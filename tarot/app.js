@@ -1,4 +1,5 @@
-const API_KEY = "hynous_api_base";
+const POLLINATIONS = "https://image.pollinations.ai/prompt/";
+const RELAY_KEY = "hynous_api_base";
 const apiBaseInput = document.getElementById("api-base");
 const cardSelect = document.getElementById("card");
 const motifInput = document.getElementById("motif");
@@ -7,7 +8,7 @@ const imageEl = document.getElementById("image");
 const promptEl = document.getElementById("prompt");
 const statusEl = document.getElementById("status");
 
-apiBaseInput.value = localStorage.getItem(API_KEY) || "";
+apiBaseInput.value = localStorage.getItem(RELAY_KEY) || "";
 seed();
 
 apiBaseInput.addEventListener("change", persistBase);
@@ -16,7 +17,8 @@ generateBtn.addEventListener("click", generate);
 
 function persistBase() {
   const value = apiBaseInput.value.trim().replace(/\/$/, "");
-  if (value) localStorage.setItem(API_KEY, value);
+  if (value) localStorage.setItem(RELAY_KEY, value);
+  else localStorage.removeItem(RELAY_KEY);
 }
 
 function buildPrompt(card, motif) {
@@ -36,26 +38,47 @@ async function generate() {
   promptEl.textContent = prompt;
 
   const base = (apiBaseInput.value.trim() || "").replace(/\/$/, "");
-  if (!base) {
-    imageEl.src = fallbackSvg(card, motif);
-    statusEl.textContent = "No API base configured. Rendered local fallback.";
-    return;
+
+  // Strategy 1: Custom relay (if configured)
+  if (base) {
+    statusEl.textContent = "Generating via relay…";
+    try {
+      const res = await fetch(`${base}/api/tarot-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ card, motif })
+      });
+      const data = await res.json();
+      if (res.ok && data.imageDataUrl) {
+        imageEl.src = data.imageDataUrl;
+        statusEl.textContent = `Generated via ${data.provider || "relay"}.`;
+        return;
+      }
+    } catch (e) {
+      statusEl.textContent = `Relay failed (${e.message}), falling back to Pollinations…`;
+    }
   }
 
-  statusEl.textContent = "Generating image…";
+  // Strategy 2: Pollinations.ai (free, no auth, CORS-friendly)
+  statusEl.textContent = "Generating via Pollinations.ai…";
+  const pollinationsUrl = POLLINATIONS + encodeURIComponent(prompt) + "?width=512&height=768&nologo=true&seed=" + Math.floor(Math.random() * 99999);
+
   try {
-    const res = await fetch(`${base}/api/tarot-image`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ card, motif })
+    // Preload as image to verify it works
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    const loaded = await new Promise((resolve, reject) => {
+      img.onload = () => resolve(true);
+      img.onerror = () => reject(new Error("image failed"));
+      setTimeout(() => reject(new Error("timeout")), 45000);
+      img.src = pollinationsUrl;
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || `${res.status}`);
-    imageEl.src = data.imageDataUrl || fallbackSvg(card, motif);
-    statusEl.textContent = `Generated via ${data.provider || "unknown provider"}.`;
-  } catch (error) {
+    imageEl.src = pollinationsUrl;
+    statusEl.textContent = "Generated via Pollinations.ai (free, Stable Diffusion).";
+  } catch (e) {
+    // Strategy 3: SVG fallback
     imageEl.src = fallbackSvg(card, motif);
-    statusEl.textContent = `API unavailable. Rendered local fallback instead: ${error.message}`;
+    statusEl.textContent = `All providers failed. SVG fallback rendered. (${e.message})`;
   }
 }
 
