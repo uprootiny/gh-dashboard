@@ -51,8 +51,11 @@ const briefNotes = document.getElementById("brief-notes");
 const briefSchema = document.getElementById("brief-schema");
 const briefPromptPack = document.getElementById("brief-prompt-pack");
 const briefScaffold = document.getElementById("brief-scaffold");
+const toolManifestEl = document.getElementById("tool-manifest");
+const toolCommandsEl = document.getElementById("tool-commands");
 const downloadBriefJsonBtn = document.getElementById("download-brief-json");
 const downloadScaffoldBtn = document.getElementById("download-scaffold");
+const downloadToolManifestBtn = document.getElementById("download-tool-manifest");
 const galleryEl = document.getElementById("pipeline-gallery");
 const rerollGalleryBtn = document.getElementById("reroll-gallery");
 const tarotCardSelect = document.getElementById("tarot-card");
@@ -283,6 +286,10 @@ function attachFoundryHandlers() {
     if (!latestCompiledBundle) return;
     downloadTextFile("hynous-scaffold.txt", latestCompiledBundle.scaffoldText, "text/plain");
   });
+  downloadToolManifestBtn.addEventListener("click", () => {
+    if (!latestCompiledBundle) return;
+    downloadTextFile("hynous-tool-manifest.json", latestCompiledBundle.toolManifestText, "application/json");
+  });
   rerollGalleryBtn.addEventListener("click", () => {
     renderPipelineGallery();
     touchAsh();
@@ -442,6 +449,8 @@ function renderBrief(brief) {
   briefSchema.textContent = latestCompiledBundle.schemaText;
   briefPromptPack.textContent = latestCompiledBundle.promptPackText;
   briefScaffold.textContent = latestCompiledBundle.scaffoldText;
+  toolManifestEl.textContent = latestCompiledBundle.toolManifestText;
+  toolCommandsEl.textContent = latestCompiledBundle.commandSurfaceText;
 }
 
 function emulateFoundryBrief(payload) {
@@ -538,6 +547,33 @@ function emulateFoundryBrief(payload) {
 }
 
 function buildCompiledBundle(brief, payload) {
+  const toolManifest = {
+    tool_name: "hynous-generated-harness",
+    mode: payload.behavioral.collaborationMode || "Collaborator with visible structure",
+    archetypes: brief?.archetypes || [],
+    primary_views: [
+      "workbench",
+      "brief-inspector",
+      "history-ledger",
+      "tarot-layer"
+    ],
+    modules: [
+      "intake-compiler",
+      "hypothesis-review",
+      "task-ledger",
+      "prompt-pack",
+      "memory-policy",
+      "agent-routing"
+    ],
+    persistence: {
+      brief: "durable",
+      prompts: "durable",
+      task_status: "durable",
+      live_conversation_state: "ephemeral"
+    },
+    policies: brief?.behavioralContract || []
+  };
+
   const schema = {
     user_portrait: {
       summary: brief?.portrait?.summary || "",
@@ -572,20 +608,44 @@ function buildCompiledBundle(brief, payload) {
     "  src/foundry.js        # intake compiler UI",
     "  src/brief-render.js   # brief and hypothesis rendering",
     "  src/tarot.js          # symbolic card and image flow",
+    "  src/workbench.js      # primary operator surface",
+    "  src/history-ledger.js # resumable state and branch history",
     "api/",
     "  server.mjs            # provider routing and foundry endpoints",
     "  prompt-pack.json      # exported system and agent contracts",
     "  personal-brief.json   # compiled brief artifact",
+    "  tool-manifest.json    # generated tool contract",
     "",
     "Example personal-brief.json excerpt:",
     JSON.stringify(schema, null, 2)
+  ].join("\n");
+
+  const commandSurface = [
+    "generated CLI surface",
+    "---------------------",
+    "tool intake          # update intake and traces",
+    "tool brief           # inspect compiled PersonalBrief",
+    "tool review          # inspect hypotheses and contradictions",
+    "tool route           # emit routed work packets",
+    "tool tarot           # render symbolic assets",
+    "tool resume          # reopen the ledger at the latest checkpoint",
+    "",
+    "primary workflow",
+    "----------------",
+    "1. compile intake into brief",
+    "2. review hypotheses and contradictions",
+    "3. route bounded tasks by agent tier",
+    "4. checkpoint outputs into the ledger",
+    "5. resume safely under quota pressure"
   ].join("\n");
 
   return {
     brief,
     schemaText: JSON.stringify(schema, null, 2),
     promptPackText: promptPack,
-    scaffoldText: scaffold
+    scaffoldText: scaffold,
+    toolManifestText: JSON.stringify(toolManifest, null, 2),
+    commandSurfaceText: commandSurface
   };
 }
 

@@ -101,6 +101,26 @@ createServer(async (req, res) => {
       return writeJson(res, 200, result);
     }
 
+    if (req.method === "POST" && url.pathname === "/api/tarot-image") {
+      const body = await readJsonBody(req);
+      const card = String(body?.card || "The Lantern").trim();
+      const motif = String(body?.motif || "woodcut tarot, ember-lit workshop, symbolic frontstage").trim();
+      const prompt = buildTarotPrompt(card, motif);
+
+      try {
+        const image = await generateTarotImage(prompt);
+        return writeJson(res, 200, image);
+      } catch (error) {
+        return writeJson(res, 200, {
+          provider: "svg-fallback",
+          model: "local-svg",
+          prompt,
+          imageDataUrl: svgTarotFallback(card, motif),
+          warnings: [error.message || "Remote image generation failed; returned SVG fallback."]
+        });
+      }
+    }
+
     if (req.method === "GET" || req.method === "HEAD") {
       return serveStatic(url.pathname, res, req.method === "HEAD");
     }
@@ -550,4 +570,97 @@ function heuristicFoundryBrief(payload) {
       "Review arcana-to-feature mappings before production use."
     ]
   };
+}
+
+function buildTarotPrompt(card, motif) {
+  return [
+    `${card}, tarot card illustration`,
+    motif,
+    "ornate vertical composition",
+    "symbolic archetype",
+    "warm bark and ash palette",
+    "woodgrain textures",
+    "subtle ember light",
+    "high detail",
+    "no text, no watermark, no logo"
+  ].join(", ");
+}
+
+async function generateTarotImage(prompt) {
+  if (!process.env.HF_TOKEN) {
+    throw new Error("HF_TOKEN not configured");
+  }
+
+  const model = process.env.HF_IMAGE_MODEL || "stabilityai/stable-diffusion-xl-base-1.0";
+  const response = await fetch(`https://api-inference.huggingface.co/models/${encodeURIComponent(model)}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.HF_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      inputs: prompt,
+      parameters: {
+        negative_prompt: "blurry, distorted hands, extra limbs, text, watermark, logo, cropped, low quality",
+        width: 768,
+        height: 1152,
+        guidance_scale: 8,
+        num_inference_steps: 30
+      }
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`HF image generation failed: ${response.status} ${response.statusText}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  const base64 = Buffer.from(arrayBuffer).toString("base64");
+
+  return {
+    provider: "huggingface",
+    model,
+    prompt,
+    imageDataUrl: `data:image/png;base64,${base64}`
+  };
+}
+
+function svgTarotFallback(card, motif) {
+  const safeCard = escapeXml(card);
+  const safeMotif = escapeXml(motif);
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="768" height="1152" viewBox="0 0 768 1152">
+    <defs>
+      <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="#233d32"/>
+        <stop offset="50%" stop-color="#4b2e2a"/>
+        <stop offset="100%" stop-color="#8a5a44"/>
+      </linearGradient>
+      <radialGradient id="ember" cx="50%" cy="44%" r="26%">
+        <stop offset="0%" stop-color="#fff4e2"/>
+        <stop offset="30%" stop-color="#ffc15c"/>
+        <stop offset="65%" stop-color="#ff8740"/>
+        <stop offset="100%" stop-color="rgba(179,63,43,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="768" height="1152" rx="40" fill="url(#bg)"/>
+    <rect x="26" y="26" width="716" height="1100" rx="28" fill="none" stroke="#f5e9d3" stroke-opacity="0.55" stroke-width="2"/>
+    <circle cx="384" cy="392" r="170" fill="rgba(255,244,226,0.06)" stroke="#f5e9d3" stroke-opacity="0.18"/>
+    <circle cx="384" cy="392" r="132" fill="none" stroke="#f5e9d3" stroke-opacity="0.14"/>
+    <circle cx="384" cy="392" r="86" fill="url(#ember)"/>
+    <path d="M154 612 C268 540 318 720 384 612 C450 504 510 696 620 612" fill="none" stroke="#f5e9d3" stroke-opacity="0.52" stroke-width="4" stroke-linecap="round"/>
+    <path d="M164 670 C268 612 326 760 384 690 C442 620 498 744 604 676" fill="none" stroke="#f5e9d3" stroke-opacity="0.28" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="384" y="136" text-anchor="middle" font-family="Georgia, serif" font-size="54" fill="#fff4e2">${safeCard}</text>
+    <text x="384" y="972" text-anchor="middle" font-family="Georgia, serif" font-size="24" fill="#f5e9d3" opacity="0.82">${safeMotif}</text>
+  </svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
+function escapeXml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }

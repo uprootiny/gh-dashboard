@@ -52,6 +52,26 @@ It retries transient failures up to `LLM_MAX_RETRIES` and falls back to a determ
 - `GET /api/providers`
 - `POST /api/chat`
 - `POST /api/foundry/brief`
+- `POST /api/tarot-image`
+
+## Validation
+
+Run the local validation passes before deploying:
+
+```bash
+npm run check
+npm test
+```
+
+The smoke pass verifies:
+
+- the root foundry app
+- the tarot app
+- the ops app
+- relay health and provider discovery
+- chat fallback
+- foundry brief compilation
+- tarot image generation or explicit local fallback
 
 ## GitHub Pages
 

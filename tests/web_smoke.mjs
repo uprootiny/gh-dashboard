@@ -54,6 +54,8 @@ try {
   const rootHtml = await fetchText("/");
   assert.match(rootHtml, /Ἑυνοῦς/);
   assert.match(rootHtml, /Foundry/);
+  assert.match(rootHtml, /Tool manifest/);
+  assert.match(rootHtml, /Download tool manifest/);
 
   const tarotHtml = await fetchText("/tarot/");
   assert.match(tarotHtml, /Tarot/i);
