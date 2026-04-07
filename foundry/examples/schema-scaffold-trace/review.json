@@ -1,0 +1,9 @@
+{
+  "id": "schema-scaffold:accept:2026-04-07T21:11:58+00:00",
+  "created_at": "2026-04-07T21:11:58+00:00",
+  "job_id": "schema-scaffold",
+  "run_id": "schema-scaffold:2026-04-07T21:11:58+00:00",
+  "decision": "accept",
+  "notes": "parent accepted scaffold for current brief",
+  "artifact": "artifacts/schema-scaffold/latest-output.md"
+}

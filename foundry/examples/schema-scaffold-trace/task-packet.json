@@ -1,0 +1,27 @@
+{
+  "job_id": "schema-scaffold",
+  "agent_role": "implementer",
+  "preferred_agent": "codex",
+  "fallback_agent": "gemini",
+  "task_statement": "Produce concrete starter files and implementation surfaces from the brief.",
+  "constraints": [
+    "keep uncertainty visible",
+    "ask before durable memory writes",
+    "do not fabricate plurality for its own sake",
+    "checkpoint every step"
+  ],
+  "success_conditions": [
+    "produce a concrete artifact",
+    "preserve quota-aware and resume-friendly posture",
+    "call out contradictions and unresolved risks explicitly"
+  ],
+  "time_budget_minutes": 15,
+  "token_budget": 9000,
+  "allowed_tools": [
+    "read",
+    "write",
+    "test"
+  ],
+  "resume_from": "state/session.json",
+  "trace_parent": "state/jobs.json"
+}

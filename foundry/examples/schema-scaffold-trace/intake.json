@@ -1,0 +1,39 @@
+{
+  "captured_at": "2026-04-07T21:11:57+00:00",
+  "practical": {
+    "devices": "desktop, laptop, occasional mobile",
+    "budget": "prefer resilience over minimal cost",
+    "hosting": "VPS-first, terminal-native, optional static web front",
+    "privacy": "consentful memory, explicit retention controls",
+    "primary_domains": "architecture, code hardening, research synthesis"
+  },
+  "behavioral": {
+    "collaboration_mode": "collaborator with visible structure",
+    "ambiguity_tolerance": "medium: infer boldly but keep uncertainty visible",
+    "preferred_outputs": "nested briefs, implementation plans, prompts, branchable alternatives",
+    "pain_points": "genericity, brittle magic, poor inspectability, weak continuity",
+    "working_rhythm": "alternates between deep work and opportunistic capture"
+  },
+  "symbolic": {
+    "arcana": [
+      "Forge",
+      "Lantern",
+      "Archive",
+      "Veil"
+    ],
+    "motifs": "symbolic frontstage, formal backstage"
+  },
+  "traces": {
+    "notes": "repeated requests for stronger structure and durable context"
+  },
+  "resource_posture": {
+    "quota_aware": true,
+    "preferred_mode": "resume-friendly",
+    "long_running_agents": false,
+    "parallelism": {
+      "max_jobs": 2
+    },
+    "checkpoint_every_step": true,
+    "degrade_gracefully": true
+  }
+}

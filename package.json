@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node api/server.mjs",
     "dev": "node --watch api/server.mjs",
-    "check": "node --check api/server.mjs && node --check src/dashboard.js"
+    "check": "node --check api/server.mjs && node --check src/dashboard.js && node --check tarot/app.js && node --check ops/app.js",
+    "test": "python3 -m unittest tests/test_foundry.py && node tests/web_smoke.mjs",
+    "smoke": "node tests/web_smoke.mjs"
   },
   "engines": {
     "node": ">=18"

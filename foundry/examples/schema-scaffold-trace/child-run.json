@@ -1,0 +1,23 @@
+{
+  "id": "schema-scaffold:2026-04-07T21:11:58+00:00",
+  "created_at": "2026-04-07T21:11:58+00:00",
+  "job_id": "schema-scaffold",
+  "agent_role": "implementer",
+  "kind": "implementation",
+  "status": "completed",
+  "agent": "codex",
+  "degraded_from": null,
+  "artifact": "artifacts/schema-scaffold/latest-output.md",
+  "meter": {
+    "synthetic_tokens_in": 742,
+    "synthetic_tokens_out": 701,
+    "latency_ms": 1400,
+    "cost_tier": "medium",
+    "degraded_from": null
+  },
+  "budgets": {
+    "token_budget": 9000,
+    "time_budget_minutes": 15
+  },
+  "summary": "Completed child run for schema-scaffold via codex"
+}

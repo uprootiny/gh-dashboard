@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-04-07T21:11:58+00:00",
+  "portrait": {
+    "summary": "User appears to want a collaborator with visible structure harness with consentful memory, explicit retention controls."
+  },
+  "contradictions": [
+    "No hard contradiction detected, but review autonomy vs. inspectability during build routing."
+  ],
+  "behavioralContract": [
+    "keep uncertainty visible",
+    "ask before durable memory writes",
+    "do not fabricate plurality for its own sake",
+    "checkpoint every step"
+  ],
+  "capabilities": [
+    "three-strata intake compiler",
+    "editable preference hypotheses",
+    "durable task ledger",
+    "quota-aware routing",
+    "tarot prompt and render pipeline",
+    "resume-friendly checkpointing",
+    "single-thread structured collaboration",
+    "evidence and confidence channels"
+  ],
+  "resourcePosture": {
+    "quota_aware": true,
+    "parallelism": {
+      "max_jobs": 2
+    },
+    "checkpoint_every_step": true,
+    "degrade_gracefully": true
+  }
+}
