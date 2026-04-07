@@ -3,91 +3,1757 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GitHub Quota Dashboard — uprootiny</title>
+  <title>Ἑυνοῦς — Identity-Driven Tooling Landing Page</title>
+  <meta
+    name="description"
+    content="Ἑυνοῦς shapes raw data into refined insight through craft, continuity, energy, and transparent tooling."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700&family=Roboto+Slab:wght@500;600&display=swap"
+    rel="stylesheet"
+  >
   <style>
     :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --border: #30363d;
-      --text: #e6edf3;
-      --dim: #8b949e;
-      --green: #3fb950;
-      --yellow: #d29922;
-      --red: #f85149;
-      --blue: #58a6ff;
+      --color-bark: #4b2e2a;
+      --color-cedar: #8a5a44;
+      --color-sun: #d9b382;
+      --color-pale-ash: #f5e9d3;
+      --color-forest: #233d32;
+      --color-fern: #4c6c56;
+      --color-sprig: #b4c7a9;
+      --color-mist: #d7e2c5;
+      --color-flame: #b33f2b;
+      --color-ember: #ff8740;
+      --color-char: #ffc15c;
+      --color-heat: #fff4e2;
+      --color-charcoal: #555555;
+      --color-ash: #9e9e9e;
+      --color-dust: #e0e0e0;
+      --color-white: #ffffff;
+      --surface-strong: rgba(255, 244, 226, 0.88);
+      --surface-soft: rgba(255, 249, 241, 0.72);
+      --border-soft: rgba(75, 46, 42, 0.14);
+      --shadow-heavy: 0 30px 80px rgba(35, 61, 50, 0.18);
+      --shadow-soft: 0 18px 40px rgba(75, 46, 42, 0.1);
+      --radius-xl: 32px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --page-max: 1240px;
+      --grain-progress: 0;
+      --mesh-opacity: 0.08;
+      --ash-opacity: 0;
+      --ash-drift: 0px;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 24px;
-      max-width: 1200px;
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      color: var(--color-bark);
+      background:
+        radial-gradient(circle at top left, rgba(255, 193, 92, 0.28), transparent 34%),
+        radial-gradient(circle at 80% 20%, rgba(76, 108, 86, 0.16), transparent 28%),
+        linear-gradient(180deg, #f4eadb 0%, #ece0cb 48%, #e2d4be 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, rgba(75, 46, 42, 0.04), transparent 28%),
+        repeating-radial-gradient(circle at 18% 14%, rgba(75, 46, 42, 0.04), rgba(75, 46, 42, 0.04) 2px, transparent 3px, transparent 26px);
+      mix-blend-mode: multiply;
+      opacity: 0.45;
+      z-index: -2;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: var(--ash-opacity);
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(85, 85, 85, 0.18) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 70% 60%, rgba(85, 85, 85, 0.12) 0 1px, transparent 1.4px),
+        radial-gradient(circle at 40% 80%, rgba(85, 85, 85, 0.1) 0 1px, transparent 1.4px);
+      background-size: 180px 180px, 220px 220px, 260px 260px;
+      transform: translateY(var(--ash-drift));
+      transition: opacity 600ms ease, transform 6s linear;
+      z-index: -1;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .page-shell {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .section {
+      width: min(var(--page-max), calc(100vw - 32px));
       margin: 0 auto;
     }
-    h1 { font-size: 20px; margin-bottom: 4px; }
-    .subtitle { color: var(--dim); font-size: 13px; margin-bottom: 24px; }
-    .grid {
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: blur(18px);
+      background: rgba(245, 233, 211, 0.72);
+      border-bottom: 1px solid rgba(75, 46, 42, 0.08);
+    }
+
+    .site-nav__inner {
+      width: min(var(--page-max), calc(100vw - 32px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 72px;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-family: "Roboto Slab", serif;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-mark__seal {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 193, 92, 0.72) 0 18%, rgba(179, 63, 43, 0.88) 20%, rgba(75, 46, 42, 0.96) 64%, rgba(35, 61, 50, 0.94) 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 244, 226, 0.28), 0 10px 24px rgba(35, 61, 50, 0.18);
+      color: var(--color-heat);
+      font-size: 1.3rem;
+    }
+
+    .brand-mark__text strong {
+      display: block;
+      font-family: "Merriweather", serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .brand-mark__text span {
+      display: block;
+      color: var(--color-charcoal);
+      font-size: 0.86rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--color-charcoal);
+      font-size: 0.96rem;
+    }
+
+    .nav-links a {
+      position: relative;
+      padding-bottom: 4px;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 180ms ease;
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a:focus-visible::after {
+      transform: scaleX(1);
+    }
+
+    .hero {
+      position: relative;
+      padding: 56px 0 40px;
+    }
+
+    .hero__frame {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
+      gap: 28px;
+      min-height: calc(100vh - 148px);
+      align-items: stretch;
+    }
+
+    .hero__panel,
+    .hero__visual {
+      position: relative;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-soft);
+      background: linear-gradient(145deg, var(--surface-strong), rgba(255, 249, 241, 0.74));
+      box-shadow: var(--shadow-heavy);
+      overflow: clip;
+    }
+
+    .hero__panel {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 244, 226, 0.92);
+      border: 1px solid rgba(75, 46, 42, 0.12);
+      color: var(--color-forest);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--color-char) 0 25%, var(--color-flame) 35%, var(--color-bark) 100%);
+      box-shadow: 0 0 18px rgba(255, 135, 64, 0.42);
+    }
+
+    .hero h1,
+    .section-title {
+      margin: 0;
+      font-family: "Merriweather", serif;
+      line-height: 0.94;
+      letter-spacing: -0.04em;
+    }
+
+    .hero h1 {
+      font-size: clamp(3.4rem, 8vw, 7rem);
+      max-width: 8ch;
+    }
+
+    .hero__lede {
+      max-width: 60ch;
+      color: var(--color-charcoal);
+      font-size: 1.08rem;
+      line-height: 1.75;
+    }
+
+    .hero__tagline {
+      color: var(--color-forest);
+      font-family: "Roboto Slab", serif;
+      font-size: 1.12rem;
+      line-height: 1.6;
+    }
+
+    .hero__form {
+      display: grid;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .hero__input-wrap {
+      position: relative;
+      border-radius: calc(var(--radius-lg) + 4px);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(75, 46, 42, 0.12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .hero__input-wrap::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-bark), var(--color-cedar), var(--color-char), var(--color-flame));
+      transform: scaleX(var(--grain-progress));
+      transform-origin: left center;
+      transition: transform 420ms cubic-bezier(0.2, 0.9, 0.2, 1);
+    }
+
+    .hero__input {
+      width: 100%;
+      min-height: 136px;
+      border: 0;
+      resize: vertical;
+      outline: none;
+      background: transparent;
+      padding: 22px 22px 30px;
+      color: var(--color-bark);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .hero__input::placeholder,
+    .token-input::placeholder {
+      color: rgba(85, 85, 85, 0.8);
+    }
+
+    .grain-svg {
+      position: absolute;
+      inset: auto 18px 12px 18px;
+      width: calc(100% - 36px);
+      height: 78px;
+      pointer-events: none;
+      opacity: 0.92;
+    }
+
+    .grain-line {
+      fill: none;
+      stroke: rgba(75, 46, 42, 0.86);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-dasharray: 720;
+      stroke-dashoffset: calc(720 - (720 * var(--grain-progress)));
+      transition: stroke-dashoffset 420ms cubic-bezier(0.2, 0.9, 0.2, 1), opacity 240ms ease;
+    }
+
+    .hero__controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero__cta,
+    .refresh-btn,
+    .connect-btn {
+      position: relative;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 22px;
+      color: var(--color-heat);
+      background: linear-gradient(135deg, var(--color-bark), var(--color-flame));
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      box-shadow: 0 18px 28px rgba(179, 63, 43, 0.24);
+      transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+    }
+
+    .hero__cta:hover,
+    .refresh-btn:hover,
+    .connect-btn:hover,
+    .hero__cta:focus-visible,
+    .refresh-btn:focus-visible,
+    .connect-btn:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 34px rgba(179, 63, 43, 0.28);
+      filter: saturate(1.05);
+      outline: none;
+    }
+
+    .hero__pulse {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 48px;
+      margin-left: 12px;
+    }
+
+    .hero__pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-char);
+      opacity: 0.38;
+      transform: scale(0.86);
+    }
+
+    .hero__cta.is-pulsing .hero__pulse-dot {
+      animation: emberPulse 720ms ease-out;
+    }
+
+    .hero__cta.is-pulsing .hero__pulse-dot:nth-child(2) {
+      animation-delay: 90ms;
+    }
+
+    .hero__cta.is-pulsing .hero__pulse-dot:nth-child(3) {
+      animation-delay: 180ms;
+    }
+
+    @keyframes emberPulse {
+      0% {
+        opacity: 0.2;
+        transform: scale(0.72);
+      }
+      40% {
+        opacity: 1;
+        transform: scale(1.72);
+        box-shadow: 0 0 24px rgba(255, 135, 64, 0.58);
+      }
+      100% {
+        opacity: 0.48;
+        transform: scale(1);
+      }
+    }
+
+    .hero__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--color-charcoal);
+      font-size: 0.92rem;
+    }
+
+    .hero__meta span {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.44);
+      border: 1px solid rgba(75, 46, 42, 0.1);
+    }
+
+    .hero__result {
+      position: relative;
+      min-height: 216px;
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(245, 233, 211, 0.9)),
+        radial-gradient(circle at top right, rgba(255, 193, 92, 0.22), transparent 32%);
+      border: 1px solid rgba(75, 46, 42, 0.12);
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      align-content: start;
+      gap: 14px;
+    }
+
+    .hero__result::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(85, 85, 85, 0.04), transparent 40%),
+        radial-gradient(circle at 18% 22%, rgba(85, 85, 85, 0.08) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 78% 70%, rgba(85, 85, 85, 0.07) 0 1px, transparent 1.5px);
+      opacity: 0.72;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    .hero__result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero__result-title {
+      font-family: "Roboto Slab", serif;
+      font-size: 1.08rem;
+      color: var(--color-forest);
+    }
+
+    .hero__result-state {
+      font-size: 0.84rem;
+      color: var(--color-charcoal);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero__result-body {
+      position: relative;
+      z-index: 1;
+      line-height: 1.75;
+      color: var(--color-bark);
+    }
+
+    .hero__result-body strong {
+      color: var(--color-forest);
+    }
+
+    .hero__visual {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      min-height: 720px;
+      padding: 30px;
+      background:
+        radial-gradient(circle at 45% 38%, rgba(255, 193, 92, 0.34) 0 14%, rgba(179, 63, 43, 0.18) 18%, transparent 48%),
+        linear-gradient(180deg, rgba(35, 61, 50, 0.06), rgba(75, 46, 42, 0.08)),
+        rgba(255, 248, 236, 0.78);
+    }
+
+    .crosscut {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 440px;
+    }
+
+    .crosscut__halo {
+      position: absolute;
+      width: 72%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 193, 92, 0.4), rgba(255, 193, 92, 0.08) 40%, transparent 66%);
+      filter: blur(12px);
+    }
+
+    .crosscut__log {
+      position: relative;
+      width: min(82%, 420px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255, 244, 226, 0.78) 0 6%, rgba(255, 193, 92, 0.92) 7% 9%, rgba(255, 135, 64, 0.84) 10%, rgba(138, 90, 68, 0.96) 12%, rgba(75, 46, 42, 0.98) 16%, rgba(75, 46, 42, 0.86) 23%, rgba(138, 90, 68, 0.88) 24%, rgba(75, 46, 42, 0.9) 31%, rgba(138, 90, 68, 0.76) 32%, rgba(75, 46, 42, 0.92) 42%, rgba(138, 90, 68, 0.82) 43%, rgba(35, 61, 50, 0.84) 68%, rgba(35, 61, 50, 0.92) 100%);
+      box-shadow: inset 0 0 0 2px rgba(255, 244, 226, 0.16), 0 30px 60px rgba(35, 61, 50, 0.18);
+      overflow: hidden;
+    }
+
+    .crosscut__log::before,
+    .crosscut__log::after {
+      content: "";
+      position: absolute;
+      inset: 8%;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 249, 241, 0.16);
+      transform: rotate(8deg);
+    }
+
+    .crosscut__log::after {
+      inset: 18%;
+      transform: rotate(-12deg);
+    }
+
+    .crosscut__ember {
+      position: absolute;
+      width: 17%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      top: 41%;
+      left: 43%;
+      background: radial-gradient(circle, var(--color-heat) 0 24%, var(--color-char) 30%, var(--color-ember) 52%, rgba(179, 63, 43, 0.92) 74%, transparent 76%);
+      box-shadow: 0 0 34px rgba(255, 135, 64, 0.62);
+      animation: emberBreath 3.4s ease-in-out infinite;
+    }
+
+    @keyframes emberBreath {
+      0%, 100% {
+        transform: scale(0.96);
+        filter: saturate(0.92);
+      }
+      50% {
+        transform: scale(1.08);
+        filter: saturate(1.14);
+      }
+    }
+
+    .crosscut__caption {
+      display: grid;
+      gap: 10px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 249, 241, 0.82);
+      border: 1px solid rgba(75, 46, 42, 0.12);
+    }
+
+    .crosscut__caption strong {
+      font-family: "Roboto Slab", serif;
+      font-size: 1.02rem;
+      color: var(--color-forest);
+    }
+
+    .crosscut__caption p {
+      margin: 0;
+      color: var(--color-charcoal);
+      line-height: 1.7;
+    }
+
+    .section-block {
+      padding: 80px 0;
+    }
+
+    .section-heading {
+      display: grid;
+      gap: 14px;
+      max-width: 62ch;
+      margin-bottom: 34px;
+    }
+
+    .section-title {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+    }
+
+    .section-copy {
+      color: var(--color-charcoal);
+      line-height: 1.8;
+      font-size: 1.02rem;
+    }
+
+    .values-grid,
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel-card {
+      position: relative;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      background: var(--surface-soft);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    .panel-card h3 {
+      margin: 0 0 10px;
+      font-family: "Roboto Slab", serif;
+      font-size: 1.14rem;
+      color: var(--color-forest);
+    }
+
+    .panel-card p,
+    .panel-card li {
+      color: var(--color-charcoal);
+      line-height: 1.7;
+    }
+
+    .panel-card ul {
+      margin: 14px 0 0;
+      padding-left: 18px;
+    }
+
+    .value-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: var(--color-charcoal);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .value-chip::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-flame), var(--color-char));
+    }
+
+    .mesh-section {
+      position: relative;
+    }
+
+    .mesh-section::before {
+      content: "";
+      position: absolute;
+      inset: 18px 0 auto;
+      height: min(460px, 58vw);
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(76, 108, 86, 0.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(76, 108, 86, 0.16) 1px, transparent 1px),
+        radial-gradient(circle at 10px 10px, rgba(76, 108, 86, 0.26) 0 2px, transparent 2.4px);
+      background-size: 82px 82px, 82px 82px, 82px 82px;
+      background-position: center top;
+      opacity: var(--mesh-opacity);
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92), transparent 92%);
+      z-index: -1;
+    }
+
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .process-step {
+      min-height: 240px;
+    }
+
+    .process-step__icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      background: linear-gradient(145deg, rgba(255, 244, 226, 0.96), rgba(217, 179, 130, 0.36));
+      border: 1px solid rgba(75, 46, 42, 0.12);
+      color: var(--color-forest);
+    }
+
+    .process-step svg {
+      width: 34px;
+      height: 34px;
+    }
+
+    .sandbox {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .dropzone {
+      position: relative;
+      min-height: 420px;
+      padding: 24px;
+      border-radius: var(--radius-xl);
+      border: 1px dashed rgba(75, 46, 42, 0.28);
+      background:
+        linear-gradient(145deg, rgba(255, 249, 241, 0.82), rgba(255, 244, 226, 0.65)),
+        radial-gradient(circle at 30% 20%, rgba(255, 193, 92, 0.18), transparent 34%);
+      box-shadow: var(--shadow-soft);
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .dropzone.is-active {
+      transform: translateY(-2px);
+      border-color: rgba(179, 63, 43, 0.48);
+      box-shadow: 0 26px 42px rgba(179, 63, 43, 0.16);
+    }
+
+    .dropzone__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 16px;
-      margin-bottom: 24px;
+      margin-bottom: 14px;
     }
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+
+    .dropzone__header strong {
+      font-family: "Roboto Slab", serif;
+      color: var(--color-forest);
+      font-size: 1.08rem;
+    }
+
+    .dropzone__hint {
+      color: var(--color-charcoal);
+      font-size: 0.94rem;
+      line-height: 1.65;
+    }
+
+    .dropzone textarea {
+      width: 100%;
+      min-height: 212px;
+      resize: vertical;
+      border: 0;
+      outline: none;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.62);
+      padding: 18px;
+      color: var(--color-bark);
+      line-height: 1.7;
+      box-shadow: inset 0 0 0 1px rgba(75, 46, 42, 0.08);
+    }
+
+    .dropzone__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .ghost-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(75, 46, 42, 0.18);
+      padding: 12px 18px;
+      background: rgba(255, 255, 255, 0.44);
+      color: var(--color-bark);
+      font-weight: 600;
+    }
+
+    .demo-result {
+      min-height: 420px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .demo-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .demo-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -12% 18% -12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(75, 46, 42, 0.62), transparent);
+      transform: scaleX(var(--grain-progress));
+      transform-origin: left center;
+      transition: transform 420ms ease;
+    }
+
+    .demo-stat {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(75, 46, 42, 0.08);
+      color: var(--color-charcoal);
+      font-size: 0.95rem;
+    }
+
+    .demo-stat:last-child {
+      border-bottom: 0;
+    }
+
+    .tooling-shell {
+      display: grid;
+      grid-template-columns: minmax(300px, 0.86fr) minmax(0, 1.14fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .foundry-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.05fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .field-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--color-forest);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: 1px solid rgba(75, 46, 42, 0.14);
+      background: rgba(255, 255, 255, 0.74);
+      color: var(--color-bark);
+      padding: 14px 16px;
+      border-radius: 16px;
+      outline: none;
+      line-height: 1.6;
+    }
+
+    .field textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .card-deck {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .arcana-card {
+      text-align: left;
+      width: 100%;
       padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(75, 46, 42, 0.12);
+      background:
+        linear-gradient(145deg, rgba(255, 249, 241, 0.94), rgba(245, 233, 211, 0.66)),
+        radial-gradient(circle at top right, rgba(255, 193, 92, 0.16), transparent 42%);
+      color: var(--color-bark);
+      box-shadow: var(--shadow-soft);
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
     }
-    .card h2 { font-size: 14px; color: var(--dim); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .metric { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
-    .metric:last-child { border-bottom: none; }
-    .metric-name { font-size: 13px; }
-    .metric-value { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
-    .bar-container { width: 120px; height: 6px; background: var(--border); border-radius: 3px; margin-left: 12px; }
-    .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
-    .bar-fill.green { background: var(--green); }
-    .bar-fill.yellow { background: var(--yellow); }
-    .bar-fill.red { background: var(--red); }
-    .metric-right { display: flex; align-items: center; gap: 8px; }
-    .status { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
-    .status.ok { background: var(--green); }
-    .status.warn { background: var(--yellow); }
-    .status.crit { background: var(--red); }
-    .refresh-btn {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
+
+    .arcana-card:hover,
+    .arcana-card:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(179, 63, 43, 0.36);
     }
-    .refresh-btn:hover { border-color: var(--blue); }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .last-updated { color: var(--dim); font-size: 12px; margin-top: 8px; }
-    .token-input { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 13px; width: 260px; margin-right: 8px; }
-    .setup { margin-bottom: 24px; }
-    #error { color: var(--red); font-size: 13px; margin-top: 8px; display: none; }
+
+    .arcana-card.is-selected {
+      border-color: rgba(179, 63, 43, 0.52);
+      box-shadow: 0 18px 34px rgba(179, 63, 43, 0.16);
+      background:
+        linear-gradient(145deg, rgba(255, 249, 241, 0.98), rgba(255, 193, 92, 0.24)),
+        radial-gradient(circle at top right, rgba(255, 135, 64, 0.18), transparent 42%);
+    }
+
+    .arcana-card strong {
+      display: block;
+      font-family: "Roboto Slab", serif;
+      color: var(--color-forest);
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .arcana-card span {
+      display: block;
+      color: var(--color-charcoal);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.52);
+      border: 1px solid rgba(75, 46, 42, 0.1);
+      color: var(--color-charcoal);
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .brief-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .brief-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--color-charcoal);
+      line-height: 1.7;
+    }
+
+    .brief-list li + li {
+      margin-top: 6px;
+    }
+
+    .api-config {
+      display: grid;
+      gap: 8px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(75, 46, 42, 0.1);
+      background: rgba(255, 255, 255, 0.54);
+    }
+
+    .tooling-setup {
+      display: grid;
+      gap: 14px;
+    }
+
+    .token-input {
+      width: 100%;
+      border: 1px solid rgba(75, 46, 42, 0.14);
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--color-bark);
+      padding: 14px 16px;
+      border-radius: 16px;
+      outline: none;
+    }
+
+    .setup-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(75, 46, 42, 0.12);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      font-family: "Roboto Slab", serif;
+      font-size: 1rem;
+      color: var(--color-forest);
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(75, 46, 42, 0.08);
+    }
+
+    .metric:last-child {
+      border-bottom: 0;
+    }
+
+    .metric-name {
+      font-size: 0.94rem;
+      line-height: 1.5;
+    }
+
+    .metric-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-value {
+      font-size: 0.93rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .bar-container {
+      width: 88px;
+      height: 7px;
+      background: rgba(75, 46, 42, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 280ms ease;
+    }
+
+    .bar-fill.green {
+      background: linear-gradient(90deg, var(--color-fern), #6fa47f);
+    }
+
+    .bar-fill.yellow {
+      background: linear-gradient(90deg, #c78625, var(--color-char));
+    }
+
+    .bar-fill.red {
+      background: linear-gradient(90deg, var(--color-flame), #cc5f3c);
+    }
+
+    .status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status.ok {
+      background: var(--color-fern);
+    }
+
+    .status.warn {
+      background: #c78625;
+    }
+
+    .status.crit {
+      background: var(--color-flame);
+    }
+
+    .last-updated,
+    .status-line {
+      color: var(--color-charcoal);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    #error {
+      display: none;
+      color: var(--color-flame);
+      font-weight: 600;
+    }
+
+    .footer {
+      position: relative;
+      padding: 44px 0 60px;
+      background:
+        linear-gradient(180deg, rgba(224, 224, 224, 0.12), rgba(224, 224, 224, 0.46)),
+        radial-gradient(circle at 20% 30%, rgba(180, 199, 169, 0.22), transparent 30%);
+      border-top: 1px solid rgba(75, 46, 42, 0.08);
+      overflow: clip;
+    }
+
+    .footer::before,
+    .footer::after {
+      content: "";
+      position: absolute;
+      inset: auto auto -30px 12%;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 1px solid rgba(75, 46, 42, 0.06);
+      animation: rise 10s linear infinite;
+    }
+
+    .footer::after {
+      left: auto;
+      right: 10%;
+      width: 96px;
+      height: 96px;
+      animation-duration: 13s;
+      animation-delay: 2s;
+    }
+
+    @keyframes rise {
+      from {
+        transform: translateY(0);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.16;
+      }
+      to {
+        transform: translateY(-180px);
+        opacity: 0;
+      }
+    }
+
+    .footer__inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .footer__tag {
+      color: var(--color-charcoal);
+      max-width: 56ch;
+      line-height: 1.7;
+    }
+
+    .footer__links {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--color-forest);
+      font-weight: 600;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--color-fern);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 1080px) {
+      .hero__frame,
+      .foundry-grid,
+      .sandbox,
+      .tooling-shell,
+      .process-grid,
+      .values-grid,
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .field-row,
+      .card-deck {
+        grid-template-columns: 1fr;
+      }
+
+      .hero__visual {
+        min-height: auto;
+      }
+
+      .crosscut {
+        min-height: 360px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .site-nav__inner,
+      .hero__panel,
+      .hero__visual,
+      .panel-card,
+      .dropzone,
+      .card {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .site-nav__inner {
+        min-height: 64px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding-top: 26px;
+      }
+
+      .hero__frame {
+        min-height: auto;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.8rem, 17vw, 4.4rem);
+      }
+
+      .hero__panel {
+        padding-top: 26px;
+        padding-bottom: 26px;
+      }
+
+      .hero__visual {
+        padding-top: 22px;
+        padding-bottom: 22px;
+      }
+
+      .crosscut__caption {
+        padding: 16px;
+      }
+
+      .hero__controls,
+      .setup-actions,
+      .dropzone__actions,
+      .footer__inner {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .hero__cta,
+      .refresh-btn,
+      .connect-btn,
+      .ghost-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      body::after {
+        opacity: 0 !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div>
-      <h1>GitHub Quota Dashboard</h1>
-      <div class="subtitle">uprootiny — tracking usage across API, Actions, Packages, Storage</div>
-    </div>
-    <button class="refresh-btn" onclick="refresh()">Refresh</button>
-  </div>
+  <div class="page-shell">
+    <header class="site-nav">
+      <div class="site-nav__inner">
+        <a class="brand-mark" href="#top" aria-label="Ἑυνοῦς home">
+          <span class="brand-mark__seal">Ἑ</span>
+          <span class="brand-mark__text">
+            <strong>Ἑυνοῦς</strong>
+            <span>AI harness for shaped matter</span>
+          </span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#about">About</a>
+          <a href="#process">How it works</a>
+          <a href="#foundry">Foundry</a>
+          <a href="#sandbox">Sandbox</a>
+          <a href="#tooling">Tooling pulse</a>
+        </nav>
+      </div>
+    </header>
 
-  <div class="setup" id="setup">
-    <input type="password" class="token-input" id="token" placeholder="GitHub token (ghp_... or gho_...)">
-    <button class="refresh-btn" onclick="saveToken()">Connect</button>
-    <div id="error"></div>
-  </div>
+    <main id="top">
+      <section class="hero section" aria-labelledby="hero-title">
+        <div class="hero__frame">
+          <div class="hero__panel">
+            <span class="eyebrow">Matter joined with form</span>
+            <div>
+              <h1 id="hero-title">Ἑυνοῦς</h1>
+              <p class="hero__tagline">From raw data to refined insight. A craft of matter, not just code.</p>
+            </div>
+            <p class="hero__lede">
+              The harness treats every request like material: gather the grain, cut a clean line through noise,
+              ignite the useful core, and leave behind a durable artifact you can return to. The page itself shows that flow.
+            </p>
 
-  <div class="grid" id="dashboard"></div>
-  <div class="last-updated" id="updated"></div>
+            <div class="hero__form">
+              <label class="visually-hidden" for="hero-input">Ask a question</label>
+              <div class="hero__input-wrap">
+                <textarea
+                  id="hero-input"
+                  class="hero__input"
+                  aria-label="Ask a question"
+                  placeholder="Ask a question, paste rough notes, or describe a task. The grain line will follow your intent."
+                >Summarize scattered repo notes into a launch checklist with clear next actions and a durable artifact.</textarea>
+                <svg class="grain-svg" viewBox="0 0 720 80" aria-hidden="true">
+                  <path class="grain-line" d="M4,44 C118,8 196,70 302,42 S498,4 716,40" />
+                </svg>
+              </div>
+              <div class="hero__controls">
+                <button class="hero__cta" id="generate-btn" type="button" aria-label="Generate">
+                  Generate
+                  <span class="hero__pulse" aria-hidden="true">
+                    <span class="hero__pulse-dot"></span>
+                    <span class="hero__pulse-dot"></span>
+                    <span class="hero__pulse-dot"></span>
+                  </span>
+                </button>
+                <div class="hero__meta">
+                  <span>Craft as interface</span>
+                  <span>Continuity as memory</span>
+                  <span>Energy made legible</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="hero__visual" aria-label="Identity composition">
+            <div class="crosscut">
+              <div class="crosscut__halo"></div>
+              <div class="crosscut__log">
+                <div class="crosscut__ember"></div>
+              </div>
+            </div>
+            <div class="hero__result" id="hero-result" aria-live="polite">
+              <div class="hero__result-header">
+                <span class="hero__result-title">Artifact in formation</span>
+                <span class="hero__result-state" id="hero-result-state">Idle</span>
+              </div>
+              <div class="hero__result-body" id="hero-result-body">
+                The answer card settles here with a thin ash film once the ember pulse completes.
+              </div>
+            </div>
+            <div class="crosscut__caption">
+              <strong>Layering order</strong>
+              <p>Log as substrate. Grain line as process. Ember as energy. Ash as residue. Form as reusable answer.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section section-block" id="about" aria-labelledby="about-title">
+        <div class="section-heading">
+          <span class="eyebrow">Brand foundation</span>
+          <h2 class="section-title" id="about-title">The harness is tactile on purpose</h2>
+          <p class="section-copy">
+            Ἑυνοῦς names the join between raw matter and shaped intention. The language, palette, motion, and tooling
+            all make the assistant feel like a workshop: grounded, exact, and persistent.
+          </p>
+        </div>
+
+        <div class="values-grid">
+          <article class="panel-card">
+            <span class="value-chip">Craft</span>
+            <h3>Grain-line trace</h3>
+            <p>The line is not decoration. It behaves like a record of force through material, revealing how the request is being shaped.</p>
+          </article>
+          <article class="panel-card">
+            <span class="value-chip">Transparency</span>
+            <h3>Ash as visible residue</h3>
+            <p>Outputs arrive with light texture and status cues so the system feels inspectable rather than magical.</p>
+          </article>
+          <article class="panel-card">
+            <span class="value-chip">Continuity</span>
+            <h3>Root-mesh below the surface</h3>
+            <p>The infrastructure layer stays quiet until you need it, then appears as connected structure instead of hidden complexity.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-block mesh-section" id="process" aria-labelledby="process-title">
+        <div class="section-heading">
+          <span class="eyebrow">Process</span>
+          <h2 class="section-title" id="process-title">How Ἑυνοῦς works</h2>
+          <p class="section-copy">
+            The product language is hylomorphic: raw input enters as material, the harness records a cut through it, energy condenses into an answer,
+            and the answer remains as something durable enough to reuse.
+          </p>
+        </div>
+
+        <div class="process-grid">
+          <article class="panel-card process-step">
+            <div class="process-step__icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" fill="none">
+                <path d="M5 22C10 10 18 10 27 15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M5 26C11 18 18 18 27 22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>1. Receive the grain</h3>
+            <p>Requests begin rough: snippets, logs, half-formed questions, mismatched constraints, a pile of matter.</p>
+          </article>
+          <article class="panel-card process-step">
+            <div class="process-step__icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" fill="none">
+                <path d="M4 20C9 8 18 11 28 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M9 23L15 16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>2. Cut a line</h3>
+            <p>The system finds the axis of the task and makes the reasoning legible. The grain line becomes the trace of that cut.</p>
+          </article>
+          <article class="panel-card process-step">
+            <div class="process-step__icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="4.5" fill="currentColor"/>
+                <path d="M16 5V11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M16 21V27" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M5 16H11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M21 16H27" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>3. Ignite the core</h3>
+            <p>The ember pulse marks transformation: rough material turns into a bounded output with momentum and heat.</p>
+          </article>
+          <article class="panel-card process-step">
+            <div class="process-step__icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" fill="none">
+                <path d="M8 11C11 13 14 13 16 11C18 13 21 13 24 11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M7 18C10 20 13 20 16 18C19 20 22 20 25 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M9 24H23" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>4. Leave durable residue</h3>
+            <p>The ash layer signals persistence. Results should feel reusable, inspectable, and fit for the next pass.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-block" id="foundry" aria-labelledby="foundry-title">
+        <div class="section-heading">
+          <span class="eyebrow">Foundry compiler</span>
+          <h2 class="section-title" id="foundry-title">Compile a personal AI harness brief</h2>
+          <p class="section-copy">
+            This MVP foundry keeps the three strata distinct: practical constraints, behavioral preferences, and symbolic arcana.
+            It compiles them into a personal brief through a resilient backend that can route across several LLM providers or fall back deterministically.
+          </p>
+        </div>
+
+        <div class="foundry-grid">
+          <section class="panel-card">
+            <span class="value-chip">Intake</span>
+            <h3>Three-strata interview</h3>
+            <div class="field-grid">
+              <div class="field-row">
+                <div class="field">
+                  <label for="devices">Devices</label>
+                  <input id="devices" value="Desktop, laptop, occasional mobile">
+                </div>
+                <div class="field">
+                  <label for="budget">Budget / latency</label>
+                  <input id="budget" value="Prefer resilience over minimal cost">
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="hosting">Hosting</label>
+                  <input id="hosting" value="GitHub Pages frontend + VPS API + optional local models">
+                </div>
+                <div class="field">
+                  <label for="privacy">Privacy posture</label>
+                  <input id="privacy" value="Consentful memory, explicit retention controls">
+                </div>
+              </div>
+              <div class="field">
+                <label for="primary-domains">Primary domains</label>
+                <input id="primary-domains" value="system architecture, code hardening, research synthesis, orchestration planning">
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="collaboration-mode">Collaboration mode</label>
+                  <select id="collaboration-mode">
+                    <option>Collaborator with visible structure</option>
+                    <option>Assistant with concise output</option>
+                    <option>Critic and reviewer</option>
+                    <option>Orchestra conductor</option>
+                    <option>Tutor and reflective guide</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="ambiguity-tolerance">Ambiguity tolerance</label>
+                  <select id="ambiguity-tolerance">
+                    <option>Medium: infer boldly but keep uncertainty visible</option>
+                    <option>Low: ask or verify before leaping</option>
+                    <option>High: explore multiple interpretations freely</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="preferred-outputs">Preferred outputs</label>
+                <textarea id="preferred-outputs">Nested briefs, architecture maps, implementation plans, prompts, robust defaults, branchable alternatives.</textarea>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="pain-points">Pain points</label>
+                  <textarea id="pain-points">Too generic, brittle magic, weak continuity, poor inspectability, missing versioning.</textarea>
+                </div>
+                <div class="field">
+                  <label for="working-rhythm">Working rhythm</label>
+                  <textarea id="working-rhythm">Alternates between deep architecture sessions and opportunistic capture. Wants the system to hold shape when tired.</textarea>
+                </div>
+              </div>
+              <div class="field">
+                <label>Arcana priors</label>
+                <div class="card-deck" id="arcana-deck">
+                  <button class="arcana-card is-selected" type="button" data-card="Forge">
+                    <strong>The Forge</strong>
+                    <span>Visible process, revision, branching, repeated strikes.</span>
+                  </button>
+                  <button class="arcana-card is-selected" type="button" data-card="Lantern">
+                    <strong>The Lantern</strong>
+                    <span>Slow clarity, evidence, calm verification, illuminated uncertainty.</span>
+                  </button>
+                  <button class="arcana-card is-selected" type="button" data-card="Archive">
+                    <strong>The Archive</strong>
+                    <span>Durable logs, provenance, replay, retrieval as reverence.</span>
+                  </button>
+                  <button class="arcana-card" type="button" data-card="Chorus">
+                    <strong>The Chorus</strong>
+                    <span>Plural agents, compare-and-merge, dissent-preserving orchestration.</span>
+                  </button>
+                  <button class="arcana-card" type="button" data-card="Mirror">
+                    <strong>The Mirror</strong>
+                    <span>Critique, reflection, habit detection, style feedback.</span>
+                  </button>
+                  <button class="arcana-card" type="button" data-card="Veil">
+                    <strong>The Veil</strong>
+                    <span>Privacy, compartmentalization, selective opacity, local-first boundaries.</span>
+                  </button>
+                </div>
+              </div>
+              <div class="field">
+                <label for="symbolic-motifs">Symbolic motifs and tensions</label>
+                <textarea id="symbolic-motifs">Symbolic frontstage, formal backstage. Wants ritual entry points without losing concrete system parameters.</textarea>
+              </div>
+              <div class="field">
+                <label for="trace-notes">Trace notes or log excerpts</label>
+                <textarea id="trace-notes">Repeated demands for stronger structure, observability, durable context, architectural explicitness, and robust code paths.</textarea>
+              </div>
+              <div class="dropzone__actions">
+                <button class="hero__cta" id="compile-brief" type="button">Compile brief</button>
+                <button class="ghost-btn" id="load-foundry-sample" type="button">Load foundry sample</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="brief-grid">
+            <article class="panel-card">
+              <span class="value-chip">Compiler status</span>
+              <h3>Provider routing and provenance</h3>
+              <div class="api-config">
+                <label class="field" for="api-base">
+                  <span>API base URL</span>
+                  <input id="api-base" placeholder="https://your-vps.example.com">
+                </label>
+                <div class="pill-row" id="provider-order">
+                  <span class="pill">Providers: checking…</span>
+                </div>
+                <div class="status-line" id="compile-status">Ready to compile a PersonalBrief.</div>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Personal brief</span>
+              <h3 id="brief-title">Awaiting compilation</h3>
+              <p id="brief-summary">Run the compiler to synthesize the intake strata into a user portrait, capability map, and implementation plan.</p>
+            </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Dominant archetypes</span>
+              <div class="pill-row" id="brief-archetypes">
+                <span class="pill">Foundry</span>
+                <span class="pill">Observatory</span>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Capabilities</span>
+              <ul class="brief-list" id="brief-capabilities">
+                <li>Branchable conversation state</li>
+                <li>Visible reasoning structure</li>
+                <li>Fallback-capable provider routing</li>
+              </ul>
+            </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Behavioral contract</span>
+              <ul class="brief-list" id="brief-contract">
+                <li>Keep uncertainty visible.</li>
+                <li>Prefer explicit structure over generic polish.</li>
+              </ul>
+            </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Implementation plan</span>
+              <ul class="brief-list" id="brief-plan">
+                <li>Connect intake to the backend compiler.</li>
+                <li>Deploy static frontend and VPS API.</li>
+              </ul>
+            </article>
+          </section>
+        </div>
+      </section>
+
+      <section class="section section-block" id="sandbox" aria-labelledby="sandbox-title">
+        <div class="section-heading">
+          <span class="eyebrow">Demo sandbox</span>
+          <h2 class="section-title" id="sandbox-title">Feed raw matter into the workshop</h2>
+          <p class="section-copy">
+            Paste loose notes, unstructured data, or rough planning text. The sandbox turns it into a compact artifact with a visible process state.
+          </p>
+        </div>
+
+        <div class="sandbox">
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone__header">
+              <strong>Raw matter</strong>
+              <span class="status-line" id="sandbox-state">Ready to shape</span>
+            </div>
+            <p class="dropzone__hint">
+              Drag text in, paste rough notes, or use the sample. Focus and generation advance the grain line; reduced-motion users still get instant state changes.
+            </p>
+            <label class="visually-hidden" for="sandbox-input">Raw data snippet</label>
+            <textarea id="sandbox-input" aria-label="Raw data snippet">Customer feedback is spread across docs, GitHub issues, and Slack. Need a release-readiness summary by noon. Known risks: flaky onboarding, unclear metrics ownership, half-written docs, no single launch checklist.</textarea>
+            <div class="dropzone__actions">
+              <button class="hero__cta" id="sandbox-run" type="button">Shape artifact</button>
+              <button class="ghost-btn" id="sandbox-sample" type="button">Load alternate sample</button>
+            </div>
+          </div>
+
+          <div class="demo-result">
+            <article class="panel-card demo-card">
+              <span class="value-chip">Artifact</span>
+              <h3>Refined output</h3>
+              <p id="demo-output">
+                No artifact yet. Run the sandbox to transform the input into a launch-ready summary with constraints and next steps.
+              </p>
+            </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Process telemetry</span>
+              <div class="demo-stat"><span>Cut focus</span><strong id="demo-focus">Awaiting input</strong></div>
+              <div class="demo-stat"><span>Energy state</span><strong id="demo-energy">Idle</strong></div>
+              <div class="demo-stat"><span>Residue</span><strong id="demo-residue">None settled</strong></div>
+              <div class="demo-stat"><span>Artifact form</span><strong id="demo-form">Summary card</strong></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-block" id="tooling" aria-labelledby="tooling-title">
+        <div class="section-heading">
+          <span class="eyebrow">Tooling pulse</span>
+          <h2 class="section-title" id="tooling-title">Live infrastructure under the brand skin</h2>
+          <p class="section-copy">
+            The original GitHub quota dashboard remains part of the workshop. It now sits inside the landing page as a concrete expression of continuity:
+            the system not only speaks in metaphor, it also shows live operational state.
+          </p>
+        </div>
+
+        <div class="tooling-shell">
+          <aside class="panel-card tooling-setup">
+            <span class="value-chip">Connect GitHub</span>
+            <h3>Feed the harness account telemetry</h3>
+            <p>
+              Use a GitHub token to populate API, Actions, repo, and storage metrics. The view stays local in the browser and can be refreshed at will.
+            </p>
+            <label class="visually-hidden" for="token">GitHub token</label>
+            <input type="password" class="token-input" id="token" placeholder="GitHub token (ghp_... or gho_...)" aria-label="GitHub token">
+            <div class="setup-actions">
+              <button class="connect-btn" id="connect-btn" type="button">Connect</button>
+              <button class="refresh-btn" id="refresh-btn" type="button">Refresh metrics</button>
+            </div>
+            <div class="status-line" id="setup-copy">No token stored. Connect to load live quota data.</div>
+            <div id="error" role="alert"></div>
+            <div class="last-updated" id="updated">Last updated: not yet loaded</div>
+          </aside>
+
+          <div class="dashboard-grid" id="dashboard" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="section footer__inner">
+        <div class="footer__tag">
+          Powered by Ἑυνοῦς. ὕλη in the cloud, shaped into artifacts that stay useful after the spark is gone.
+        </div>
+        <div class="footer__links">
+          <a href="#top">Top</a>
+          <a href="#foundry">Foundry</a>
+          <a href="#sandbox">Sandbox</a>
+          <a href="#tooling">Tooling</a>
+        </div>
+      </div>
+    </footer>
+  </div>
 
   <script src="src/dashboard.js"></script>
 </body>

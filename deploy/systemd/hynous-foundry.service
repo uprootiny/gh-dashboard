@@ -1,0 +1,15 @@
+[Unit]
+Description=Hynous Foundry API
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/hynous-foundry
+EnvironmentFile=/opt/hynous-foundry/.env
+ExecStart=/usr/bin/env node api/server.mjs
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,112 +1,527 @@
-const API = 'https://api.github.com';
-const USER = 'uprootiny';
+const API = "https://api.github.com";
+const USER = "uprootiny";
+const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const API_BASE_KEY = "hynous_api_base";
 
-let token = localStorage.getItem('gh_token') || '';
+let token = localStorage.getItem("gh_token") || "";
+let idleTimer = null;
+let apiBase = localStorage.getItem(API_BASE_KEY) || defaultApiBase();
+
+const heroInput = document.getElementById("hero-input");
+const heroResultState = document.getElementById("hero-result-state");
+const heroResultBody = document.getElementById("hero-result-body");
+const generateBtn = document.getElementById("generate-btn");
+
+const sandboxInput = document.getElementById("sandbox-input");
+const sandboxRun = document.getElementById("sandbox-run");
+const sandboxSample = document.getElementById("sandbox-sample");
+const sandboxState = document.getElementById("sandbox-state");
+const demoOutput = document.getElementById("demo-output");
+const demoFocus = document.getElementById("demo-focus");
+const demoEnergy = document.getElementById("demo-energy");
+const demoResidue = document.getElementById("demo-residue");
+const dropzone = document.getElementById("dropzone");
+
+const dashboard = document.getElementById("dashboard");
+const updated = document.getElementById("updated");
+const tokenInput = document.getElementById("token");
+const errorEl = document.getElementById("error");
+const setupCopy = document.getElementById("setup-copy");
+const connectBtn = document.getElementById("connect-btn");
+const refreshBtn = document.getElementById("refresh-btn");
+const meshSection = document.getElementById("process");
+const apiBaseInput = document.getElementById("api-base");
+const providerOrder = document.getElementById("provider-order");
+const compileStatus = document.getElementById("compile-status");
+
+const compileBtn = document.getElementById("compile-brief");
+const loadFoundrySampleBtn = document.getElementById("load-foundry-sample");
+const arcanaDeck = document.getElementById("arcana-deck");
+const briefTitle = document.getElementById("brief-title");
+const briefSummary = document.getElementById("brief-summary");
+const briefArchetypes = document.getElementById("brief-archetypes");
+const briefCapabilities = document.getElementById("brief-capabilities");
+const briefContract = document.getElementById("brief-contract");
+const briefPlan = document.getElementById("brief-plan");
+
+const heroSamples = [
+  "I feel the grain of your request. I'll turn the scattered repo notes into a release artifact with risks surfaced, ownership made explicit, and the next pass already staged.",
+  "The harness has cut through the loose matter: one artifact, three risks, and a direct path from rough input to reusable operational form.",
+  "Raw fragments joined cleanly. Expect a compact answer that preserves traceability, keeps the energy legible, and leaves behind a durable checklist."
+];
+
+const sandboxSamples = [
+  "Incident notes: alerts came from three systems, ownership was split across ops and product, and no one could tell which runbook was current. Need a stabilization brief and a handoff doc.",
+  "Research backlog: twelve interview clips, five issue threads, and a half-complete PRD. Need a synthesis that separates signal from repeated noise before planning.",
+  "Deployment prep: staging is green, production metrics are missing, rollback steps are outdated, and docs are split across three repos. Need a go/no-go sheet."
+];
 
 if (token) {
-  document.getElementById('setup').style.display = 'none';
-  refresh();
+  tokenInput.value = token;
+  setupCopy.textContent = "Token stored locally. Refresh to pull live GitHub telemetry.";
+}
+
+if (apiBaseInput) {
+  apiBaseInput.value = apiBase;
+}
+
+init();
+
+function init() {
+  attachHeroHandlers();
+  attachSandboxHandlers();
+  attachFoundryHandlers();
+  attachDashboardHandlers();
+  attachGlobalActivityHandlers();
+  updateMeshOpacity();
+  setIdleAsh(false);
+
+  document.addEventListener("scroll", updateMeshOpacity, { passive: true });
+
+  if (token) {
+    refresh();
+  } else {
+    renderDashboardPlaceholder("Connect a token to load live quota cards.");
+  }
+
+  refreshProviderStatus();
+}
+
+function attachHeroHandlers() {
+  heroInput.addEventListener("focus", () => {
+    setGrainProgress(1);
+    if (navigator.vibrate) navigator.vibrate(10);
+  });
+
+  heroInput.addEventListener("blur", () => {
+    if (!heroInput.value.trim()) setGrainProgress(0.18);
+  });
+
+  heroInput.addEventListener("input", () => {
+    setGrainProgress(heroInput.value.trim() ? 1 : 0.18);
+  });
+
+  generateBtn.addEventListener("click", async () => {
+    const request = heroInput.value.trim();
+    if (!request) return;
+
+    heroResultState.textContent = "Igniting";
+    heroResultBody.innerHTML = "<strong>Grain captured.</strong> Cutting a clean line through the request…";
+    pulseButton(generateBtn);
+    setGrainProgress(1);
+
+    try {
+      const result = await callHarnessChat(request);
+      heroResultState.textContent = result.provider ? `Settled via ${result.provider}` : "Settled";
+      heroResultBody.innerHTML = result.output;
+    } catch {
+      const answer = await fakeAI(request);
+      heroResultState.textContent = "Settled locally";
+      heroResultBody.innerHTML = answer;
+    }
+    touchAsh();
+  });
+}
+
+function attachSandboxHandlers() {
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.add("is-active");
+      sandboxState.textContent = "Drop text to shape it";
+    });
+  });
+
+  ["dragleave", "dragend"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, () => {
+      dropzone.classList.remove("is-active");
+      sandboxState.textContent = "Ready to shape";
+    });
+  });
+
+  dropzone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    const text = event.dataTransfer?.getData("text/plain")?.trim();
+    if (text) {
+      sandboxInput.value = text;
+      sandboxState.textContent = "Dropped matter captured";
+      demoFocus.textContent = "Dropped source loaded";
+      setGrainProgress(1);
+    } else {
+      sandboxState.textContent = "Drop plain text or pasted notes";
+    }
+    dropzone.classList.remove("is-active");
+  });
+
+  sandboxInput.addEventListener("focus", () => {
+    dropzone.classList.add("is-active");
+    demoFocus.textContent = "Material engaged";
+    sandboxState.textContent = "Tracking grain";
+    setGrainProgress(1);
+  });
+
+  sandboxInput.addEventListener("blur", () => {
+    dropzone.classList.remove("is-active");
+    if (!sandboxInput.value.trim()) demoFocus.textContent = "Awaiting input";
+  });
+
+  sandboxSample.addEventListener("click", () => {
+    sandboxInput.value = sandboxSamples[Math.floor(Math.random() * sandboxSamples.length)];
+    sandboxState.textContent = "Alternate matter loaded";
+    demoFocus.textContent = "Material refreshed";
+    setGrainProgress(1);
+  });
+
+  sandboxRun.addEventListener("click", async () => {
+    const source = sandboxInput.value.trim();
+    if (!source) return;
+
+    sandboxState.textContent = "Cutting and igniting";
+    demoEnergy.textContent = "Pulse rising";
+    demoResidue.textContent = "Settling";
+    pulseButton(sandboxRun);
+
+    await wait(REDUCED_MOTION ? 0 : 520);
+
+    const artifact = buildArtifact(source);
+    demoOutput.innerHTML = artifact.html;
+    demoFocus.textContent = artifact.focus;
+    demoEnergy.textContent = "Ember condensed";
+    demoResidue.textContent = "Artifact preserved";
+    sandboxState.textContent = "Artifact ready";
+    touchAsh();
+  });
+}
+
+function attachDashboardHandlers() {
+  connectBtn.addEventListener("click", saveToken);
+  refreshBtn.addEventListener("click", refresh);
+}
+
+function attachFoundryHandlers() {
+  apiBaseInput.addEventListener("change", persistApiBase);
+  apiBaseInput.addEventListener("blur", persistApiBase);
+
+  arcanaDeck.querySelectorAll("[data-card]").forEach((button) => {
+    button.addEventListener("click", () => {
+      button.classList.toggle("is-selected");
+      touchAsh();
+    });
+  });
+
+  loadFoundrySampleBtn.addEventListener("click", loadFoundrySample);
+  compileBtn.addEventListener("click", compileFoundryBrief);
+}
+
+function attachGlobalActivityHandlers() {
+  ["pointerdown", "keydown", "mousemove", "touchstart"].forEach((eventName) => {
+    document.addEventListener(eventName, () => touchAsh(), { passive: true });
+  });
+  touchAsh();
+}
+
+function defaultApiBase() {
+  const { origin, hostname } = window.location;
+  if (hostname.endsWith("github.io")) return "";
+  return origin;
+}
+
+function persistApiBase() {
+  apiBase = apiBaseInput.value.trim().replace(/\/$/, "");
+  if (apiBase) {
+    localStorage.setItem(API_BASE_KEY, apiBase);
+  } else {
+    localStorage.removeItem(API_BASE_KEY);
+    apiBase = defaultApiBase();
+    apiBaseInput.value = apiBase;
+  }
+  refreshProviderStatus();
+}
+
+function setGrainProgress(value) {
+  const clamped = Math.max(0, Math.min(1, value));
+  document.documentElement.style.setProperty("--grain-progress", clamped.toFixed(3));
+}
+
+function pulseButton(button) {
+  button.classList.remove("is-pulsing");
+  void button.offsetWidth;
+  button.classList.add("is-pulsing");
+
+  window.setTimeout(() => {
+    button.classList.remove("is-pulsing");
+  }, REDUCED_MOTION ? 0 : 820);
+}
+
+function touchAsh() {
+  setIdleAsh(false);
+  window.clearTimeout(idleTimer);
+  idleTimer = window.setTimeout(() => setIdleAsh(true), 3000);
+}
+
+function setIdleAsh(isIdle) {
+  document.documentElement.style.setProperty("--ash-opacity", isIdle && !REDUCED_MOTION ? "0.08" : "0");
+  document.documentElement.style.setProperty("--ash-drift", isIdle && !REDUCED_MOTION ? "-16px" : "0px");
+}
+
+function updateMeshOpacity() {
+  const rect = meshSection.getBoundingClientRect();
+  const viewport = window.innerHeight || 1;
+  const start = viewport * 0.88;
+  const end = viewport * 0.18;
+  const progress = (start - rect.top) / (start - end);
+  const clamped = Math.max(0.08, Math.min(0.3, 0.08 + Math.max(0, progress) * 0.22));
+  document.documentElement.style.setProperty("--mesh-opacity", clamped.toFixed(3));
+}
+
+async function refreshProviderStatus() {
+  if (!apiBase) {
+    providerOrder.innerHTML = `<span class="pill">Set an API base URL for GitHub Pages use.</span>`;
+    compileStatus.textContent = "No API base configured yet.";
+    return;
+  }
+
+  providerOrder.innerHTML = `<span class="pill">Checking providers…</span>`;
+
+  try {
+    const info = await apiJson("/api/providers", { method: "GET" });
+    providerOrder.innerHTML = info.providers
+      .map((provider) => `<span class="pill">${escapeHtml(provider.id)}: ${provider.configured ? escapeHtml(provider.model || "configured") : "not configured"}</span>`)
+      .join("");
+    compileStatus.textContent = `Compiler reachable. Provider order: ${info.providerOrder.join(" → ")}`;
+  } catch {
+    providerOrder.innerHTML = `<span class="pill">API unavailable</span>`;
+    compileStatus.textContent = "Could not reach the VPS API. The foundry can still render locally, but LLM compilation is offline.";
+  }
+}
+
+async function compileFoundryBrief() {
+  compileStatus.textContent = "Compiling personal brief…";
+  pulseButton(compileBtn);
+
+  try {
+    const result = await apiJson("/api/foundry/brief", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(gatherFoundryPayload())
+    });
+
+    renderBrief(result.brief);
+    const failureCount = Array.isArray(result.failures) ? result.failures.length : 0;
+    compileStatus.textContent = `Compiled via ${result.provider}${failureCount ? ` with ${failureCount} fallback event(s)` : ""}.`;
+  } catch (error) {
+    compileStatus.textContent = `Compilation failed: ${error.message}`;
+  }
+}
+
+function gatherFoundryPayload() {
+  return {
+    practical: {
+      devices: valueOf("devices"),
+      budget: valueOf("budget"),
+      hosting: valueOf("hosting"),
+      privacy: valueOf("privacy"),
+      primaryDomains: valueOf("primary-domains")
+    },
+    behavioral: {
+      collaborationMode: valueOf("collaboration-mode"),
+      ambiguityTolerance: valueOf("ambiguity-tolerance"),
+      preferredOutputs: valueOf("preferred-outputs"),
+      painPoints: valueOf("pain-points"),
+      workingRhythm: valueOf("working-rhythm")
+    },
+    symbolic: {
+      arcana: Array.from(arcanaDeck.querySelectorAll(".arcana-card.is-selected")).map((button) => button.dataset.card),
+      tensions: [],
+      motifs: valueOf("symbolic-motifs")
+    },
+    traces: {
+      notes: valueOf("trace-notes"),
+      logs: valueOf("trace-notes")
+    }
+  };
+}
+
+function renderBrief(brief) {
+  briefTitle.textContent = "Compiled PersonalBrief";
+  briefSummary.textContent = brief?.portrait?.summary || "No portrait summary returned.";
+  briefArchetypes.innerHTML = (brief?.archetypes || ["Awaiting archetypes"])
+    .map((item) => `<span class="pill">${escapeHtml(item)}</span>`)
+    .join("");
+  briefCapabilities.innerHTML = listItems(brief?.capabilities);
+  briefContract.innerHTML = listItems(brief?.behavioralContract);
+  briefPlan.innerHTML = listItems(brief?.implementationPlan);
+}
+
+function listItems(items) {
+  const source = Array.isArray(items) && items.length ? items : ["No items returned."];
+  return source.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
+function loadFoundrySample() {
+  document.getElementById("devices").value = "Desktop, laptop, iPhone";
+  document.getElementById("budget").value = "Will pay for strong reasoning if retries and fallback are explicit";
+  document.getElementById("hosting").value = "Hybrid: GitHub Pages frontend, VPS API, optional local Ollama";
+  document.getElementById("privacy").value = "Strict consent around memory; private traces by default";
+  document.getElementById("primary-domains").value = "architecture design, orchestration, research synthesis, literary and language work";
+  document.getElementById("collaboration-mode").value = "Orchestra conductor";
+  document.getElementById("ambiguity-tolerance").value = "High: explore multiple interpretations freely";
+  document.getElementById("preferred-outputs").value = "Dense workbench outputs, ontology graphs, nested briefs, compare and merge views, implementation roadmaps.";
+  document.getElementById("pain-points").value = "Brittle assistants, missing continuity, low observability, shallow summaries, weak deployment paths.";
+  document.getElementById("working-rhythm").value = "Long architecture sessions punctuated by quick captures. Wants the system to preserve momentum across interruptions.";
+  document.getElementById("symbolic-motifs").value = "Foundry, archive, lantern, workshop, route maps, branch histories, rituals that still compile into hard parameters.";
+  document.getElementById("trace-notes").value = "Repeatedly requests stronger structure, resilience, branching, observability, multilingual support, and non-generic interface language.";
+
+  arcanaDeck.querySelectorAll(".arcana-card").forEach((button) => {
+    button.classList.toggle("is-selected", ["Forge", "Lantern", "Archive", "Chorus"].includes(button.dataset.card));
+  });
+
+  compileStatus.textContent = "Foundry sample loaded.";
+}
+
+async function callHarnessChat(prompt) {
+  const result = await apiJson("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      prompt,
+      system: "You are Ἑυνοῦς, an AI harness foundry assistant. Respond with grounded, high-signal prose that reflects craft, continuity, and inspectability."
+    })
+  });
+
+  return {
+    provider: result.provider,
+    output: result.output || "No output returned."
+  };
+}
+
+async function apiJson(path, options) {
+  const base = (apiBase || defaultApiBase()).replace(/\/$/, "");
+  if (!base) throw new Error("API base is not configured");
+  const response = await fetch(`${base}${path}`, options);
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : {};
+  if (!response.ok) throw new Error(data.error || `${response.status} ${response.statusText}`);
+  return data;
+}
+
+function valueOf(id) {
+  return document.getElementById(id)?.value?.trim() || "";
 }
 
 function saveToken() {
-  token = document.getElementById('token').value.trim();
-  if (!token) return showError('Token required');
-  localStorage.setItem('gh_token', token);
-  document.getElementById('setup').style.display = 'none';
+  token = tokenInput.value.trim();
+  if (!token) return showError("Token required");
+
+  localStorage.setItem("gh_token", token);
+  showError("");
+  setupCopy.textContent = "Token stored locally. Refresh to pull live GitHub telemetry.";
   refresh();
 }
 
-function showError(msg) {
-  const el = document.getElementById('error');
-  el.textContent = msg;
-  el.style.display = 'block';
+function showError(message) {
+  errorEl.textContent = message;
+  errorEl.style.display = message ? "block" : "none";
 }
 
 async function gh(path) {
   const res = await fetch(`${API}${path}`, {
-    headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    headers: {
+      Authorization: `token ${token}`,
+      Accept: "application/vnd.github.v3+json"
+    }
   });
+
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
   return res.json();
 }
 
 async function refresh() {
-  const dashboard = document.getElementById('dashboard');
-  dashboard.innerHTML = '<div style="color: var(--dim)">Loading...</div>';
+  if (!token) {
+    renderDashboardPlaceholder("No token stored. Connect GitHub to load live telemetry.");
+    updated.textContent = "Last updated: not yet loaded";
+    return;
+  }
+
+  renderDashboardPlaceholder("Loading live GitHub telemetry…");
+  setupCopy.textContent = "Reading API, Actions, repository, and storage state from GitHub.";
+  showError("");
 
   try {
     const [rateLimit, user, repos, actions] = await Promise.all([
-      gh('/rate_limit'),
-      gh('/user'),
+      gh("/rate_limit"),
+      gh("/user"),
       gh(`/users/${USER}/repos?per_page=5&sort=updated`),
       fetchActionsUsage()
     ]);
 
     const cards = [];
-
-    // --- API Rate Limits ---
     const resources = rateLimit.resources;
-    const rateLimitMetrics = ['core', 'search', 'graphql', 'code_search'].map(key => {
-      const r = resources[key];
-      if (!r) return null;
-      const pct = r.limit > 0 ? (r.remaining / r.limit) * 100 : 100;
-      const resetTime = new Date(r.reset * 1000).toLocaleTimeString();
-      return metric(key, `${r.remaining} / ${r.limit}`, pct, `resets ${resetTime}`);
-    }).filter(Boolean);
+    const rateLimitMetrics = ["core", "search", "graphql", "code_search"]
+      .map((key) => {
+        const resource = resources[key];
+        if (!resource) return null;
+        const pct = resource.limit > 0 ? (resource.remaining / resource.limit) * 100 : 100;
+        const resetTime = new Date(resource.reset * 1000).toLocaleTimeString();
+        return metric(key, `${resource.remaining} / ${resource.limit}`, pct, `resets ${resetTime}`);
+      })
+      .filter(Boolean);
 
-    cards.push(card('API Rate Limits', rateLimitMetrics));
+    cards.push(card("API Rate Limits", rateLimitMetrics));
 
-    // --- Account ---
     const plan = user.plan || {};
     const diskMB = ((user.disk_usage || 0) / 1024).toFixed(1);
-    cards.push(card('Account', [
-      metric('Plan', plan.name || 'free', 100),
-      metric('Public repos', `${user.public_repos}`, null),
-      metric('Private repos', `${user.total_private_repos || 0} / ${plan.private_repos || '∞'}`,
-        plan.private_repos ? (user.total_private_repos / plan.private_repos) * 100 : 100),
-      metric('Disk usage', `${diskMB} MB`, null),
-      metric('Collaborators', `${plan.collaborators || 0}`, null),
+    cards.push(card("Account", [
+      metric("Plan", plan.name || "free", 100),
+      metric("Public repos", `${user.public_repos}`, null),
+      metric(
+        "Private repos",
+        `${user.total_private_repos || 0} / ${plan.private_repos || "∞"}`,
+        plan.private_repos ? (user.total_private_repos / plan.private_repos) * 100 : 100
+      ),
+      metric("Disk usage", `${diskMB} MB`, null),
+      metric("Collaborators", `${plan.collaborators || 0}`, null)
     ]));
 
-    // --- Actions Minutes ---
     if (actions) {
-      cards.push(card('Actions Minutes (this billing cycle)', [
-        metric('Total used', `${actions.total_minutes_used} min`,
-          actions.included_minutes > 0 ? ((actions.total_minutes_used / actions.included_minutes) * 100) : null),
-        metric('Included', `${actions.included_minutes} min`, 100),
-        metric('Paid overage', `$${actions.total_paid_minutes_used || 0}`, null),
+      cards.push(card("Actions Minutes", [
+        metric(
+          "Total used",
+          `${actions.total_minutes_used} min`,
+          actions.included_minutes > 0 ? (actions.total_minutes_used / actions.included_minutes) * 100 : null
+        ),
+        metric("Included", `${actions.included_minutes} min`, 100),
+        metric("Paid overage", `$${actions.total_paid_minutes_used || 0}`, null),
         ...Object.entries(actions.minutes_used_breakdown || {}).map(([os, mins]) =>
-          metric(`  ${os}`, `${mins} min`, null)
+          metric(os, `${mins} min`, null)
         )
       ]));
     }
 
-    // --- Storage (Packages + Actions) ---
-    cards.push(card('Storage', [
-      metric('Actions artifacts', actions ? `${((actions.total_paid_storage_used || 0)).toFixed(1)} GB paid` : 'N/A', null),
-      metric('Repo disk', `${diskMB} MB`, null),
+    cards.push(card("Storage", [
+      metric(
+        "Actions artifacts",
+        actions ? `${(actions.total_paid_storage_used || 0).toFixed(1)} GB paid` : "N/A",
+        null
+      ),
+      metric("Repo disk", `${diskMB} MB`, null)
     ]));
 
-    // --- Recent Repos (workflow status) ---
-    const repoMetrics = repos.map(r => {
-      const age = timeSince(new Date(r.pushed_at));
-      return metric(r.name, `pushed ${age}`, null);
-    });
-    cards.push(card('Recent Repos', repoMetrics));
+    const repoMetrics = repos.map((repo) => metric(repo.name, `pushed ${timeSince(new Date(repo.pushed_at))}`, null));
+    cards.push(card("Recent Repos", repoMetrics));
 
-    dashboard.innerHTML = cards.join('');
-    document.getElementById('updated').textContent = `Last updated: ${new Date().toLocaleString()}`;
-  } catch (err) {
-    dashboard.innerHTML = '';
-    showError(`Failed: ${err.message}`);
-    document.getElementById('setup').style.display = 'block';
+    dashboard.innerHTML = cards.join("");
+    updated.textContent = `Last updated: ${new Date().toLocaleString()}`;
+  } catch (error) {
+    renderDashboardPlaceholder("Failed to load live telemetry. Check the token and try again.");
+    showError(`Failed: ${error.message}`);
+    setupCopy.textContent = "The harness could not read GitHub telemetry with the current token.";
+    updated.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
   }
 }
 
 async function fetchActionsUsage() {
   try {
-    // This endpoint requires the user to be part of an org or have billing access
-    // For personal accounts, try the billing API
     return await gh(`/users/${USER}/settings/billing/actions`);
   } catch {
     try {
@@ -117,37 +532,95 @@ async function fetchActionsUsage() {
   }
 }
 
+function renderDashboardPlaceholder(message) {
+  dashboard.innerHTML = `<article class="card"><h2>Tooling pulse</h2><p class="status-line">${escapeHtml(message)}</p></article>`;
+}
+
 function metric(name, value, pct, subtitle) {
-  const barColor = pct === null ? '' : pct > 70 ? 'green' : pct > 30 ? 'yellow' : 'red';
-  const statusClass = pct === null ? '' : pct > 70 ? 'ok' : pct > 30 ? 'warn' : 'crit';
+  const barColor = pct === null ? "" : pct > 70 ? "green" : pct > 30 ? "yellow" : "red";
+  const statusClass = pct === null ? "" : pct > 70 ? "ok" : pct > 30 ? "warn" : "crit";
 
   return `
     <div class="metric">
-      <span class="metric-name">${name}${subtitle ? `<br><span style="color:var(--dim);font-size:11px">${subtitle}</span>` : ''}</span>
+      <span class="metric-name">
+        ${escapeHtml(name)}
+        ${subtitle ? `<br><span style="color:var(--color-charcoal);font-size:0.76rem">${escapeHtml(subtitle)}</span>` : ""}
+      </span>
       <div class="metric-right">
-        <span class="metric-value">${value}</span>
+        <span class="metric-value">${escapeHtml(value)}</span>
         ${pct !== null ? `
           <div class="bar-container">
-            <div class="bar-fill ${barColor}" style="width:${Math.min(100, pct)}%"></div>
+            <div class="bar-fill ${barColor}" style="width:${Math.min(100, pct).toFixed(1)}%"></div>
           </div>
           <span class="status ${statusClass}"></span>
-        ` : ''}
+        ` : ""}
       </div>
-    </div>`;
+    </div>
+  `;
 }
 
 function card(title, metrics) {
-  return `<div class="card"><h2>${title}</h2>${metrics.join('')}</div>`;
+  return `<article class="card"><h2>${escapeHtml(title)}</h2>${metrics.join("")}</article>`;
 }
 
 function timeSince(date) {
-  const seconds = Math.floor((new Date() - date) / 1000);
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
   const intervals = [
-    [31536000, 'y'], [2592000, 'mo'], [86400, 'd'], [3600, 'h'], [60, 'm']
+    [31536000, "y"],
+    [2592000, "mo"],
+    [86400, "d"],
+    [3600, "h"],
+    [60, "m"]
   ];
+
   for (const [secs, label] of intervals) {
     const count = Math.floor(seconds / secs);
     if (count >= 1) return `${count}${label} ago`;
   }
-  return 'just now';
+
+  return "just now";
+}
+
+function buildArtifact(source) {
+  const fragments = source
+    .split(/[\n.;]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  const focus = fragments[0] || "Unstructured input";
+  const risks = fragments
+    .filter((item) => /risk|flaky|unclear|missing|outdated|half|no /i.test(item))
+    .slice(0, 3);
+
+  const priorities = fragments.slice(0, 3).map((item) => item.replace(/\s+/g, " "));
+  const nextAction = risks[0] || priorities[1] || "Assign an owner and close the most visible uncertainty first.";
+
+  return {
+    focus,
+    html: `
+      <strong>Refined focus:</strong> ${escapeHtml(focus)}<br><br>
+      <strong>Immediate shape:</strong> ${escapeHtml(priorities.join("; ") || source.slice(0, 180))}.<br><br>
+      <strong>First cut:</strong> ${escapeHtml(nextAction)}<br><br>
+      <strong>Residue worth keeping:</strong> one reusable artifact, one explicit owner map, and one next-pass checklist.
+    `
+  };
+}
+
+async function fakeAI(input) {
+  await wait(REDUCED_MOTION ? 0 : 800);
+  const response = heroSamples[Math.floor(Math.random() * heroSamples.length)];
+  return `${response}<br><br><strong>Input grain:</strong> ${escapeHtml(input.slice(0, 140))}${input.length > 140 ? "…" : ""}`;
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

@@ -1,0 +1,14 @@
+{
+  "name": "hynous-foundry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node api/server.mjs",
+    "dev": "node --watch api/server.mjs",
+    "check": "node --check api/server.mjs && node --check src/dashboard.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
