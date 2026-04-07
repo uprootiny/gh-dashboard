@@ -969,6 +969,41 @@
       gap: 16px;
     }
 
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .gallery-card {
+      display: grid;
+      gap: 14px;
+      min-height: 100%;
+    }
+
+    .gallery-card__meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      color: var(--color-charcoal);
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .gallery-card__quote {
+      color: var(--color-bark);
+      line-height: 1.75;
+    }
+
+    .gallery-card__small {
+      color: var(--color-charcoal);
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
     .brief-list {
       margin: 0;
       padding-left: 18px;
@@ -1209,6 +1244,7 @@
       .foundry-grid,
       .sandbox,
       .tooling-shell,
+      .gallery-grid,
       .process-grid,
       .values-grid,
       .about-grid {
@@ -1322,6 +1358,7 @@
         </a>
         <nav class="nav-links" aria-label="Primary">
           <a href="#about">About</a>
+          <a href="#principles">Principles</a>
           <a href="#process">How it works</a>
           <a href="#foundry">Foundry</a>
           <a href="#sandbox">Sandbox</a>
@@ -1337,11 +1374,11 @@
             <span class="eyebrow">Matter joined with form</span>
             <div>
               <h1 id="hero-title">Ἑυνοῦς</h1>
-              <p class="hero__tagline">From raw data to refined insight. A craft of matter, not just code.</p>
+              <p class="hero__tagline">From raw intake to inspectable brief. Symbolic frontstage, formal backstage.</p>
             </div>
             <p class="hero__lede">
-              The harness treats every request like material: gather the grain, cut a clean line through noise,
-              ignite the useful core, and leave behind a durable artifact you can return to. The page itself shows that flow.
+              What is surely possible now is narrower and stronger: gather practical constraints, behavioral preferences,
+              and symbolic priors, then compile them into a coherent artifact you can inspect, revise, and build from.
             </p>
 
             <div class="hero__form">
@@ -1352,7 +1389,7 @@
                   class="hero__input"
                   aria-label="Ask a question"
                   placeholder="Ask a question, paste rough notes, or describe a task. The grain line will follow your intent."
-                >Summarize scattered repo notes into a launch checklist with clear next actions and a durable artifact.</textarea>
+                >Turn this intake into a coherent PersonalBrief with explicit hypotheses, capabilities, and a realistic implementation path.</textarea>
                 <svg class="grain-svg" viewBox="0 0 720 80" aria-hidden="true">
                   <path class="grain-line" d="M4,44 C118,8 196,70 302,42 S498,4 716,40" />
                 </svg>
@@ -1384,16 +1421,16 @@
             </div>
             <div class="hero__result" id="hero-result" aria-live="polite">
               <div class="hero__result-header">
-                <span class="hero__result-title">Artifact in formation</span>
+                <span class="hero__result-title">Brief in formation</span>
                 <span class="hero__result-state" id="hero-result-state">Idle</span>
               </div>
               <div class="hero__result-body" id="hero-result-body">
-                The answer card settles here with a thin ash film once the ember pulse completes.
+                The first reliable artifact is the brief itself: not the finished system, but the inspected design intent that later systems can follow.
               </div>
             </div>
             <div class="crosscut__caption">
               <strong>Layering order</strong>
-              <p>Log as substrate. Grain line as process. Ember as energy. Ash as residue. Form as reusable answer.</p>
+              <p>Traces as substrate. Grain line as interpretation. Ember as compilation. Ash as durable brief. Form as buildable intent.</p>
             </div>
           </aside>
         </div>
@@ -1405,7 +1442,7 @@
           <h2 class="section-title" id="about-title">The harness is tactile on purpose</h2>
           <p class="section-copy">
             Ἑυνοῦς names the join between raw matter and shaped intention. The language, palette, motion, and tooling
-            all make the assistant feel like a workshop: grounded, exact, and persistent.
+            all serve one central promise: compile a trustworthy brief from human traces without pretending we have already solved the whole stack.
           </p>
         </div>
 
@@ -1428,13 +1465,57 @@
         </div>
       </section>
 
+      <section class="section section-block" id="principles" aria-labelledby="principles-title">
+        <div class="section-heading">
+          <span class="eyebrow">Operating principles</span>
+          <h2 class="section-title" id="principles-title">Pivot around what is surely real</h2>
+          <p class="section-copy">
+            The coherent center is not “fully personalized AI civilization in a box.” It is a compiler from intake to
+            <code>PersonalBrief</code>: typed, inspectable, revisable, and narrow enough to trust.
+          </p>
+        </div>
+
+        <div class="values-grid">
+          <article class="panel-card">
+            <span class="value-chip">1</span>
+            <h3>Compile, don’t cosplay</h3>
+            <p>Cards, motifs, and ritual matter only when they terminate in real parameters, policies, and implementation choices.</p>
+          </article>
+          <article class="panel-card">
+            <span class="value-chip">2</span>
+            <h3>Inference stays revisable</h3>
+            <p>Every hypothesis should be evidence-bearing, confidence-scored, and open to user correction instead of hidden psychologizing.</p>
+          </article>
+          <article class="panel-card">
+            <span class="value-chip">3</span>
+            <h3>One real artifact first</h3>
+            <p>The current product center is the brief: portrait, archetypes, capabilities, contract, and implementation path.</p>
+          </article>
+          <article class="panel-card">
+            <span class="value-chip">4</span>
+            <h3>Resilience over theatrics</h3>
+            <p>If providers fail, the system still emits structurally valid output. Graceful degradation is part of the product.</p>
+          </article>
+          <article class="panel-card">
+            <span class="value-chip">5</span>
+            <h3>Frontstage and backstage stay distinct</h3>
+            <p>Practical constraints, behavioral preferences, and symbolic priors are separate strata that merge only in compilation.</p>
+          </article>
+          <article class="panel-card">
+            <span class="value-chip">6</span>
+            <h3>Build quality follows brief quality</h3>
+            <p>Deployment, agents, and custom interfaces matter later. The design brief must become coherent before automation expands.</p>
+          </article>
+        </div>
+      </section>
+
       <section class="section section-block mesh-section" id="process" aria-labelledby="process-title">
         <div class="section-heading">
           <span class="eyebrow">Process</span>
           <h2 class="section-title" id="process-title">How Ἑυνοῦς works</h2>
           <p class="section-copy">
-            The product language is hylomorphic: raw input enters as material, the harness records a cut through it, energy condenses into an answer,
-            and the answer remains as something durable enough to reuse.
+            The product language is hylomorphic, but the practical target is tighter: raw intake enters as material, the system records a cut through it,
+            and the residue is a buildable brief rather than a vague promise of total personalization.
           </p>
         </div>
 
@@ -1480,8 +1561,8 @@
                 <path d="M9 24H23" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
               </svg>
             </div>
-            <h3>4. Leave durable residue</h3>
-            <p>The ash layer signals persistence. Results should feel reusable, inspectable, and fit for the next pass.</p>
+            <h3>4. Leave a durable brief</h3>
+            <p>The ash layer signals persistence. The result should be reusable, inspectable, and strong enough to drive later implementation.</p>
           </article>
         </div>
       </section>
@@ -1493,6 +1574,7 @@
           <p class="section-copy">
             This MVP foundry keeps the three strata distinct: practical constraints, behavioral preferences, and symbolic arcana.
             It compiles them into a personal brief through a resilient backend that can route across several LLM providers or fall back deterministically.
+            That brief is the product center from here.
           </p>
         </div>
 
@@ -1615,7 +1697,7 @@
                 <div class="pill-row" id="provider-order">
                   <span class="pill">Providers: checking…</span>
                 </div>
-                <div class="status-line" id="compile-status">Ready to compile a PersonalBrief.</div>
+                <div class="status-line" id="compile-status">Ready to compile the first reliable artifact: a PersonalBrief.</div>
               </div>
             </article>
 
@@ -1661,12 +1743,35 @@
         </div>
       </section>
 
+      <section class="section section-block" id="gallery" aria-labelledby="gallery-title">
+        <div class="section-heading">
+          <span class="eyebrow">Pipeline gallery</span>
+          <h2 class="section-title" id="gallery-title">Plausible products of the wizard pipeline</h2>
+          <p class="section-copy">
+            These are locally emulated outputs that fluctuate obvious parameters such as privacy posture, orchestration appetite,
+            ambiguity tolerance, and symbolic priors. They are meant to feel like excellent LLM drafts that also self-correct and expose their own limits.
+          </p>
+        </div>
+
+        <div class="dropzone__actions" style="margin-bottom:18px">
+          <button class="hero__cta" id="reroll-gallery" type="button">Reroll gallery</button>
+        </div>
+
+        <div class="gallery-grid" id="pipeline-gallery">
+          <article class="panel-card gallery-card">
+            <span class="value-chip">Gallery seed</span>
+            <h3>Awaiting emulated outputs</h3>
+            <p class="gallery-card__quote">The gallery will populate with brief variants, each representing a different compilation path through the intake space.</p>
+          </article>
+        </div>
+      </section>
+
       <section class="section section-block" id="sandbox" aria-labelledby="sandbox-title">
         <div class="section-heading">
           <span class="eyebrow">Demo sandbox</span>
           <h2 class="section-title" id="sandbox-title">Feed raw matter into the workshop</h2>
           <p class="section-copy">
-            Paste loose notes, unstructured data, or rough planning text. The sandbox turns it into a compact artifact with a visible process state.
+            Paste loose notes, unstructured data, or rough planning text. The sandbox demonstrates the transformation principle without overclaiming full product intelligence.
           </p>
         </div>
 
@@ -1713,7 +1818,7 @@
           <h2 class="section-title" id="tooling-title">Live infrastructure under the brand skin</h2>
           <p class="section-copy">
             The original GitHub quota dashboard remains part of the workshop. It now sits inside the landing page as a concrete expression of continuity:
-            the system not only speaks in metaphor, it also shows live operational state.
+            the system not only speaks in metaphor, it also shows live operational state and deployment reality.
           </p>
         </div>
 
@@ -1743,7 +1848,7 @@
     <footer class="footer">
       <div class="section footer__inner">
         <div class="footer__tag">
-          Powered by Ἑυνοῦς. ὕλη in the cloud, shaped into artifacts that stay useful after the spark is gone.
+          Powered by Ἑυνοῦς. Start with the brief, keep the inferences inspectable, and let larger systems follow only when the shape is real.
         </div>
         <div class="footer__links">
           <a href="#top">Top</a>

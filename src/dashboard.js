@@ -43,6 +43,8 @@ const briefArchetypes = document.getElementById("brief-archetypes");
 const briefCapabilities = document.getElementById("brief-capabilities");
 const briefContract = document.getElementById("brief-contract");
 const briefPlan = document.getElementById("brief-plan");
+const galleryEl = document.getElementById("pipeline-gallery");
+const rerollGalleryBtn = document.getElementById("reroll-gallery");
 
 const heroSamples = [
   "I feel the grain of your request. I'll turn the scattered repo notes into a release artifact with risks surfaced, ownership made explicit, and the next pass already staged.",
@@ -54,6 +56,49 @@ const sandboxSamples = [
   "Incident notes: alerts came from three systems, ownership was split across ops and product, and no one could tell which runbook was current. Need a stabilization brief and a handoff doc.",
   "Research backlog: twelve interview clips, five issue threads, and a half-complete PRD. Need a synthesis that separates signal from repeated noise before planning.",
   "Deployment prep: staging is green, production metrics are missing, rollback steps are outdated, and docs are split across three repos. Need a go/no-go sheet."
+];
+
+const gallerySeeds = [
+  {
+    title: "Forge + Archive workbench",
+    arcana: ["Forge", "Archive", "Lantern"],
+    privacy: "consentful persistence",
+    autonomy: "medium",
+    style: "dense and inspectable",
+    contradiction: "Wants high autonomy, but distrusts hidden transformations."
+  },
+  {
+    title: "Veil + Lantern private guide",
+    arcana: ["Veil", "Lantern"],
+    privacy: "strict local-first boundaries",
+    autonomy: "low",
+    style: "calm and citation-heavy",
+    contradiction: "Wants trustable help, but will reject silent logging."
+  },
+  {
+    title: "Chorus + Forge orchestration shell",
+    arcana: ["Chorus", "Forge", "Mirror"],
+    privacy: "balanced",
+    autonomy: "high",
+    style: "plural and branchable",
+    contradiction: "Wants many agents, but still needs a single coherent contract."
+  },
+  {
+    title: "Garden + Archive continuity studio",
+    arcana: ["Archive", "Mirror"],
+    privacy: "durable memory with pruning controls",
+    autonomy: "medium",
+    style: "slow and reflective",
+    contradiction: "Wants continuity, but not clutter or guilt-inducing resurfacing."
+  },
+  {
+    title: "Blade fallback operator",
+    arcana: ["Lantern"],
+    privacy: "minimal retention",
+    autonomy: "low",
+    style: "compressed and decisive",
+    contradiction: "Claims to want brevity, but still demands enough evidence to trust the cut."
+  }
 ];
 
 if (token) {
@@ -85,6 +130,7 @@ function init() {
   }
 
   refreshProviderStatus();
+  renderPipelineGallery();
 }
 
 function attachHeroHandlers() {
@@ -211,6 +257,10 @@ function attachFoundryHandlers() {
 
   loadFoundrySampleBtn.addEventListener("click", loadFoundrySample);
   compileBtn.addEventListener("click", compileFoundryBrief);
+  rerollGalleryBtn.addEventListener("click", () => {
+    renderPipelineGallery();
+    touchAsh();
+  });
 }
 
 function attachGlobalActivityHandlers() {
@@ -351,6 +401,72 @@ function renderBrief(brief) {
   briefCapabilities.innerHTML = listItems(brief?.capabilities);
   briefContract.innerHTML = listItems(brief?.behavioralContract);
   briefPlan.innerHTML = listItems(brief?.implementationPlan);
+}
+
+function renderPipelineGallery() {
+  const variants = shuffle([...gallerySeeds]).slice(0, 3).map(emulatePipelineProduct);
+  galleryEl.innerHTML = variants.map(renderGalleryCard).join("");
+}
+
+function emulatePipelineProduct(seed) {
+  const contract = [
+    "keep uncertainty visible",
+    seed.privacy.includes("strict") ? "ask before persistence" : "preserve explicit provenance",
+    seed.autonomy === "high" ? "allow branching agents but require merge checkpoints" : "keep execution close to user confirmation"
+  ];
+
+  const selfCorrection = seed.autonomy === "high"
+    ? "Initial draft over-indexed on autonomy. Corrected by introducing merge gates and explicit review surfaces."
+    : "Initial draft was too cautious. Corrected by allowing best-effort synthesis before asking clarifiers.";
+
+  const ui = seed.style === "dense and inspectable"
+    ? "workbench panels, branch history, evidence drawers"
+    : seed.style === "plural and branchable"
+      ? "compare-and-merge views, role panes, routing graph"
+      : seed.style === "compressed and decisive"
+        ? "minimal dashboard, hard scope controls, terse outputs"
+        : "calm split view, evidence rails, memory controls";
+
+  const output = {
+    title: seed.title,
+    arcana: seed.arcana,
+    posture: `${seed.style}; privacy: ${seed.privacy}; autonomy: ${seed.autonomy}`,
+    summary: `Compiled brief centers a ${seed.style} harness shaped by ${seed.arcana.join(" + ")}. The system privileges ${ui} and treats the first artifact as a revisable PersonalBrief, not a finished bespoke operating system.`,
+    hypotheses: [
+      `User likely values ${seed.style} collaboration more than generic chat polish.`,
+      `User likely needs ${seed.privacy} because trust depends on inspectable boundaries.`
+    ],
+    contract,
+    selfCorrection,
+    contradiction: seed.contradiction
+  };
+
+  return output;
+}
+
+function renderGalleryCard(product) {
+  return `
+    <article class="panel-card gallery-card">
+      <span class="value-chip">Emulated product</span>
+      <div class="gallery-card__meta">
+        <strong>${escapeHtml(product.title)}</strong>
+        <span>${escapeHtml(product.arcana.join(" · "))}</span>
+      </div>
+      <p class="gallery-card__quote">${escapeHtml(product.summary)}</p>
+      <div class="pill-row">
+        ${product.arcana.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("")}
+      </div>
+      <div class="gallery-card__small"><strong>Posture:</strong> ${escapeHtml(product.posture)}</div>
+      <div class="gallery-card__small"><strong>Contradiction surfaced:</strong> ${escapeHtml(product.contradiction)}</div>
+      <div class="gallery-card__small"><strong>Self-correction:</strong> ${escapeHtml(product.selfCorrection)}</div>
+      <div>
+        <strong>Behavioral contract</strong>
+        <ul class="brief-list">
+          ${product.contract.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ul>
+      </div>
+    </article>
+  `;
 }
 
 function listItems(items) {
@@ -614,6 +730,14 @@ async function fakeAI(input) {
 
 function wait(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function shuffle(items) {
+  for (let index = items.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
+  }
+  return items;
 }
 
 function escapeHtml(value) {
