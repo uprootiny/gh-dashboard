@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-04-07T21:07:11+00:00",
+  "card_id": "the-lantern",
+  "title": "The Lantern",
+  "provider": "stability",
+  "fallback_provider": "fal",
+  "outputs": [
+    "upright",
+    "reversed",
+    "emblem",
+    "monochrome"
+  ],
+  "passes": {
+    "draft": {
+      "quality": "fast",
+      "prompt": "Tarot card illustration, vertical composition, centered symbolic figure, ornate but restrained frame, high legibility, luminous emblematic imagery, mystical but disciplined, serious sacred geometry, fine linework, rich but controlled palette, no text, no watermark., tarot engraving fused with restrained symbolic digital painting, lantern halo, scholarly margins, quiet gold, night-blue field, careful hands, diagrammatic rays",
+      "negative_prompt": "photorealistic face, modern ui screenshot, text artifacts, corporate illustration"
+    },
+    "keeper": {
+      "quality": "high",
+      "prompt": "Tarot card illustration, vertical composition, centered symbolic figure, ornate but restrained frame, high legibility, luminous emblematic imagery, mystical but disciplined, serious sacred geometry, fine linework, rich but controlled palette, no text, no watermark., tarot engraving fused with restrained symbolic digital painting, lantern halo, scholarly margins, quiet gold, night-blue field, careful hands, diagrammatic rays",
+      "negative_prompt": "photorealistic face, modern ui screenshot, text artifacts, corporate illustration"
+    }
+  },
+  "variants": {
+    "upright": "primary tarot composition",
+    "reversed": "invert orientation and emphasize tension or blocked energy",
+    "emblem": "single emblem/icon version for compact UI surfaces",
+    "monochrome": "line-art print-safe version for low-ink or emboss workflows"
+  }
+}

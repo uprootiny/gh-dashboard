@@ -1,0 +1,20 @@
+{
+  "card_id": "the-archive",
+  "title": "The Archive",
+  "narrative": "Nothing important lost. Retrieval as reverence.",
+  "visual_motifs": [
+    "index drawers",
+    "inked provenance marks",
+    "thread-bound folios",
+    "dust-lit shelves",
+    "memory lattice",
+    "sealed catalog sigil"
+  ],
+  "negative_motifs": [
+    "office filing cabinet realism",
+    "spreadsheet screenshot",
+    "text artifacts",
+    "generic corporate archive"
+  ],
+  "prompt_style": "sacred archive tarot with restrained illumination, engraved framing, and durable symbolic density"
+}

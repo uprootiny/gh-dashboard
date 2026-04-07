@@ -1,0 +1,20 @@
+{
+  "card_id": "the-veil",
+  "title": "The Veil",
+  "narrative": "Boundaries, privacy, and selective opacity by consent.",
+  "visual_motifs": [
+    "layered shroud",
+    "sealed threshold",
+    "moonlit partition",
+    "compartment sigils",
+    "quiet boundary ring",
+    "hidden ember"
+  ],
+  "negative_motifs": [
+    "surveillance camera",
+    "cyberpunk neon overload",
+    "text artifacts",
+    "corporate lock icon"
+  ],
+  "prompt_style": "mystic privacy tarot with disciplined composition, low-light geometry, and veiled symbolic contrast"
+}

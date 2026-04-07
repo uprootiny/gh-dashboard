@@ -1,0 +1,20 @@
+{
+  "card_id": "the-forge",
+  "title": "The Forge",
+  "narrative": "Transformation through heat, pressure, and repeated strikes.",
+  "visual_motifs": [
+    "ember core",
+    "hammer arc",
+    "anvil silhouette",
+    "molten seam",
+    "iron sparks",
+    "concentric grain rings"
+  ],
+  "negative_motifs": [
+    "photorealistic factory",
+    "modern industrial machine",
+    "text artifacts",
+    "corporate infographic"
+  ],
+  "prompt_style": "ritual foundry tarot with disciplined symbolic composition and engraved detail"
+}

@@ -1,0 +1,20 @@
+{
+  "card_id": "the-chorus",
+  "title": "The Chorus",
+  "narrative": "Wisdom through orchestrated plurality and dissent-preserving harmony.",
+  "visual_motifs": [
+    "converging voices",
+    "braided signal lines",
+    "role masks in orbit",
+    "resonance rings",
+    "conducting hand",
+    "merge constellation"
+  ],
+  "negative_motifs": [
+    "concert stage realism",
+    "crowd photograph",
+    "text artifacts",
+    "music app interface"
+  ],
+  "prompt_style": "orchestral tarot engraving with plural symbolic figures, precise geometry, and controlled luminous contrast"
+}

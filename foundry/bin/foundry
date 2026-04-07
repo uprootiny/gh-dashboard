@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+
+usage() {
+  cat <<'EOF'
+usage: foundry <command> [args]
+
+commands:
+  intake         initialize or update intake.json from flags
+  infer          derive preference hypotheses from intake
+  compile        build PersonalBrief from intake + inference
+  build          write routed task files from the brief
+  run-agent      execute a bounded child-agent job packet
+  accept-output  record parent review on a child result
+  tarot-render   render tarot prompt specs and placeholder assets
+  resume         show current state and latest artifacts
+EOF
+}
+
+command="${1:-}"
+shift || true
+
+case "$command" in
+  intake)
+    exec "$PYTHON_BIN" "$ROOT_DIR/scripts/intake.py" "$ROOT_DIR" "$@"
+    ;;
+  infer)
+    exec "$PYTHON_BIN" "$ROOT_DIR/scripts/infer_preferences.py" "$ROOT_DIR" "$@"
+    ;;
+  compile)
+    exec "$PYTHON_BIN" "$ROOT_DIR/scripts/compile_brief.py" "$ROOT_DIR" "$@"
+    ;;
+  build)
+    exec "$PYTHON_BIN" "$ROOT_DIR/scripts/route_jobs.py" "$ROOT_DIR" "$@"
+    ;;
+  run-agent)
+    exec "$PYTHON_BIN" "$ROOT_DIR/scripts/run_agent.py" "$ROOT_DIR" "$@"
+    ;;
+  accept-output)
+    exec "$PYTHON_BIN" "$ROOT_DIR/scripts/accept_output.py" "$ROOT_DIR" "$@"
+    ;;
+  tarot-render)
+    exec "$PYTHON_BIN" "$ROOT_DIR/scripts/render_card.py" "$ROOT_DIR" "$@"
+    ;;
+  resume)
+    exec "$PYTHON_BIN" "$ROOT_DIR/scripts/resume.py" "$ROOT_DIR" "$@"
+    ;;
+  ""|-h|--help|help)
+    usage
+    ;;
+  *)
+    echo "unknown command: $command" >&2
+    usage >&2
+    exit 1
+    ;;
+esac

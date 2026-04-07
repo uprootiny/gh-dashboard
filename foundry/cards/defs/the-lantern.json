@@ -1,0 +1,20 @@
+{
+  "card_id": "the-lantern",
+  "title": "The Lantern",
+  "narrative": "Slow clarity, careful examination, illuminated uncertainty.",
+  "visual_motifs": [
+    "lantern halo",
+    "scholarly margins",
+    "quiet gold",
+    "night-blue field",
+    "careful hands",
+    "diagrammatic rays"
+  ],
+  "negative_motifs": [
+    "photorealistic face",
+    "modern ui screenshot",
+    "text artifacts",
+    "corporate illustration"
+  ],
+  "prompt_style": "tarot engraving fused with restrained symbolic digital painting"
+}
