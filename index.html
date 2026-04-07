@@ -1004,6 +1004,28 @@
       line-height: 1.65;
     }
 
+    .tarot-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.82fr) minmax(0, 1.18fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .tarot-preview {
+      display: grid;
+      gap: 14px;
+    }
+
+    .tarot-image {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      border-radius: 24px;
+      border: 1px solid rgba(75, 46, 42, 0.12);
+      background: rgba(255, 255, 255, 0.52);
+      box-shadow: var(--shadow-soft);
+    }
+
     .brief-list {
       margin: 0;
       padding-left: 18px;
@@ -1022,6 +1044,25 @@
       border-radius: 16px;
       border: 1px solid rgba(75, 46, 42, 0.1);
       background: rgba(255, 255, 255, 0.54);
+    }
+
+    .code-block {
+      margin: 0;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(35, 61, 50, 0.92);
+      color: var(--color-heat);
+      font-size: 0.86rem;
+      line-height: 1.65;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .stack-grid {
+      display: grid;
+      gap: 16px;
     }
 
     .tooling-setup {
@@ -1242,6 +1283,7 @@
     @media (max-width: 1080px) {
       .hero__frame,
       .foundry-grid,
+      .tarot-grid,
       .sandbox,
       .tooling-shell,
       .gallery-grid,
@@ -1739,7 +1781,59 @@
                 <li>Deploy static frontend and VPS API.</li>
               </ul>
             </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Hypotheses</span>
+              <ul class="brief-list" id="brief-hypotheses">
+                <li>No hypotheses yet.</li>
+              </ul>
+            </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Interface recommendations</span>
+              <ul class="brief-list" id="brief-ui">
+                <li>No interface recommendations yet.</li>
+              </ul>
+            </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Foundry agents</span>
+              <ul class="brief-list" id="brief-agents">
+                <li>No build agents yet.</li>
+              </ul>
+            </article>
+
+            <article class="panel-card">
+              <span class="value-chip">Review notes</span>
+              <ul class="brief-list" id="brief-notes">
+                <li>No review notes yet.</li>
+              </ul>
+            </article>
           </section>
+        </div>
+
+        <div class="stack-grid" style="margin-top:20px">
+          <article class="panel-card">
+            <span class="value-chip">Parameter schema</span>
+            <h3>Compiled configuration bundle</h3>
+            <pre class="code-block" id="brief-schema">Schema will appear here after compilation.</pre>
+          </article>
+
+          <article class="panel-card">
+            <span class="value-chip">Prompt pack</span>
+            <h3>System contract starter</h3>
+            <pre class="code-block" id="brief-prompt-pack">Prompt pack will appear here after compilation.</pre>
+          </article>
+
+          <article class="panel-card">
+            <span class="value-chip">Scaffold</span>
+            <h3>Starter files for the shaped tool</h3>
+            <div class="dropzone__actions">
+              <button class="ghost-btn" id="download-brief-json" type="button">Download brief JSON</button>
+              <button class="ghost-btn" id="download-scaffold" type="button">Download scaffold text</button>
+            </div>
+            <pre class="code-block" id="brief-scaffold">Starter scaffold will appear here after compilation.</pre>
+          </article>
         </div>
       </section>
 
@@ -1763,6 +1857,56 @@
             <h3>Awaiting emulated outputs</h3>
             <p class="gallery-card__quote">The gallery will populate with brief variants, each representing a different compilation path through the intake space.</p>
           </article>
+        </div>
+      </section>
+
+      <section class="section section-block" id="tarot" aria-labelledby="tarot-title">
+        <div class="section-heading">
+          <span class="eyebrow">Tarot image layer</span>
+          <h2 class="section-title" id="tarot-title">Generate symbolic cards over open image APIs</h2>
+          <p class="section-copy">
+            This is the concrete tarot path: select an arcana card, add a motif, and generate a vertical symbolic image.
+            If a Hugging Face token is configured, the backend calls a Stable Diffusion model. If not, the system returns a local SVG fallback instead of failing silently.
+          </p>
+        </div>
+
+        <div class="tarot-grid">
+          <section class="panel-card">
+            <span class="value-chip">Card forge</span>
+            <h3>Arcana prompt builder</h3>
+            <div class="field-grid">
+              <div class="field">
+                <label for="tarot-card">Card</label>
+                <select id="tarot-card">
+                  <option>The Forge</option>
+                  <option>The Lantern</option>
+                  <option>The Archive</option>
+                  <option>The Chorus</option>
+                  <option>The Mirror</option>
+                  <option>The Veil</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="tarot-motif">Motif</label>
+                <textarea id="tarot-motif">ember-lit woodcut tarot, hylomorphic workshop, grain-line filigree, bark and ash palette, symbolic frontstage</textarea>
+              </div>
+              <div class="dropzone__actions">
+                <button class="hero__cta" id="generate-tarot" type="button">Generate tarot image</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="tarot-preview">
+            <article class="panel-card">
+              <span class="value-chip">Preview</span>
+              <img class="tarot-image" id="tarot-image" alt="Generated tarot card preview">
+              <p class="status-line" id="tarot-status">Ready. This will use the backend API base if configured.</p>
+            </article>
+            <article class="panel-card">
+              <span class="value-chip">Prompt</span>
+              <pre class="code-block" id="tarot-prompt">Prompt will appear here after generation.</pre>
+            </article>
+          </section>
         </div>
       </section>
 
@@ -1853,6 +1997,8 @@
         <div class="footer__links">
           <a href="#top">Top</a>
           <a href="#foundry">Foundry</a>
+          <a href="./tarot/">Tarot App</a>
+          <a href="./ops/">Ops App</a>
           <a href="#sandbox">Sandbox</a>
           <a href="#tooling">Tooling</a>
         </div>

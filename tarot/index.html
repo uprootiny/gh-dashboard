@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ἑυνοῦς Tarot Forge</title>
+  <style>
+    :root {
+      --bark: #4b2e2a;
+      --forest: #233d32;
+      --cedar: #8a5a44;
+      --ash: #f5e9d3;
+      --flame: #b33f2b;
+      --sun: #ffc15c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, serif;
+      color: var(--bark);
+      background: linear-gradient(180deg, #f4eadb 0%, #e6d6be 100%);
+    }
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+    .nav, .grid {
+      display: grid;
+      gap: 18px;
+    }
+    .nav {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .links a, button {
+      border-radius: 999px;
+      padding: 12px 18px;
+      border: 1px solid rgba(75,46,42,.14);
+      background: rgba(255,255,255,.64);
+      color: var(--bark);
+      text-decoration: none;
+      cursor: pointer;
+      font: inherit;
+    }
+    .cta { background: linear-gradient(135deg, var(--bark), var(--flame)); color: var(--ash); border: 0; }
+    .hero, .panel {
+      border-radius: 24px;
+      background: rgba(255,249,241,.82);
+      border: 1px solid rgba(75,46,42,.1);
+      padding: 22px;
+      box-shadow: 0 18px 36px rgba(35,61,50,.12);
+    }
+    .grid { grid-template-columns: minmax(320px,.82fr) minmax(0,1.18fr); }
+    .field { display: grid; gap: 8px; margin-bottom: 14px; }
+    label { font-size: .84rem; text-transform: uppercase; letter-spacing: .06em; color: var(--forest); font-weight: 700; }
+    textarea, select, input {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(75,46,42,.14);
+      background: rgba(255,255,255,.78);
+      padding: 14px 16px;
+      font: inherit;
+      color: var(--bark);
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    img {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      border-radius: 22px;
+      border: 1px solid rgba(75,46,42,.12);
+      background: rgba(255,255,255,.54);
+    }
+    pre {
+      margin: 0;
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(35,61,50,.95);
+      color: var(--ash);
+      overflow: auto;
+      white-space: pre-wrap;
+      font-family: ui-monospace, monospace;
+      line-height: 1.55;
+    }
+    .status { color: var(--cedar); line-height: 1.7; }
+    @media (max-width: 920px) {
+      .grid { grid-template-columns: 1fr; }
+      .nav { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="nav">
+      <div>
+        <h1>Ἑυνοῦς Tarot Forge</h1>
+        <p class="status">A focused webapp for arcana image generation over a configured API base.</p>
+      </div>
+      <div class="links">
+        <a href="../">Foundry</a>
+        <a href="../ops/">Ops</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="hero">
+        <div class="field">
+          <label for="api-base">API Base URL</label>
+          <input id="api-base" placeholder="https://your-vps.example.com">
+        </div>
+        <div class="field">
+          <label for="card">Card</label>
+          <select id="card">
+            <option>The Forge</option>
+            <option>The Lantern</option>
+            <option>The Archive</option>
+            <option>The Chorus</option>
+            <option>The Mirror</option>
+            <option>The Veil</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="motif">Motif</label>
+          <textarea id="motif">ember-lit woodcut tarot, bark and ash palette, sacred geometry, serious symbolic composition, no text</textarea>
+        </div>
+        <div class="field">
+          <button class="cta" id="generate">Generate Tarot Image</button>
+        </div>
+        <p class="status" id="status">Ready. If the relay is unavailable, a local SVG fallback is rendered.</p>
+      </section>
+
+      <section class="panel">
+        <img id="image" alt="Tarot preview">
+        <div style="height:16px"></div>
+        <pre id="prompt">Prompt will appear here.</pre>
+      </section>
+    </div>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

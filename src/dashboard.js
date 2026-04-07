@@ -6,6 +6,7 @@ const API_BASE_KEY = "hynous_api_base";
 let token = localStorage.getItem("gh_token") || "";
 let idleTimer = null;
 let apiBase = localStorage.getItem(API_BASE_KEY) || defaultApiBase();
+let latestCompiledBundle = null;
 
 const heroInput = document.getElementById("hero-input");
 const heroResultState = document.getElementById("hero-result-state");
@@ -43,8 +44,23 @@ const briefArchetypes = document.getElementById("brief-archetypes");
 const briefCapabilities = document.getElementById("brief-capabilities");
 const briefContract = document.getElementById("brief-contract");
 const briefPlan = document.getElementById("brief-plan");
+const briefHypotheses = document.getElementById("brief-hypotheses");
+const briefUi = document.getElementById("brief-ui");
+const briefAgents = document.getElementById("brief-agents");
+const briefNotes = document.getElementById("brief-notes");
+const briefSchema = document.getElementById("brief-schema");
+const briefPromptPack = document.getElementById("brief-prompt-pack");
+const briefScaffold = document.getElementById("brief-scaffold");
+const downloadBriefJsonBtn = document.getElementById("download-brief-json");
+const downloadScaffoldBtn = document.getElementById("download-scaffold");
 const galleryEl = document.getElementById("pipeline-gallery");
 const rerollGalleryBtn = document.getElementById("reroll-gallery");
+const tarotCardSelect = document.getElementById("tarot-card");
+const tarotMotifInput = document.getElementById("tarot-motif");
+const generateTarotBtn = document.getElementById("generate-tarot");
+const tarotImage = document.getElementById("tarot-image");
+const tarotStatus = document.getElementById("tarot-status");
+const tarotPrompt = document.getElementById("tarot-prompt");
 
 const heroSamples = [
   "I feel the grain of your request. I'll turn the scattered repo notes into a release artifact with risks surfaced, ownership made explicit, and the next pass already staged.",
@@ -117,6 +133,7 @@ function init() {
   attachSandboxHandlers();
   attachFoundryHandlers();
   attachDashboardHandlers();
+  attachTarotHandlers();
   attachGlobalActivityHandlers();
   updateMeshOpacity();
   setIdleAsh(false);
@@ -131,6 +148,7 @@ function init() {
 
   refreshProviderStatus();
   renderPipelineGallery();
+  seedTarotPreview();
 }
 
 function attachHeroHandlers() {
@@ -257,10 +275,22 @@ function attachFoundryHandlers() {
 
   loadFoundrySampleBtn.addEventListener("click", loadFoundrySample);
   compileBtn.addEventListener("click", compileFoundryBrief);
+  downloadBriefJsonBtn.addEventListener("click", () => {
+    if (!latestCompiledBundle) return;
+    downloadTextFile("hynous-brief.json", JSON.stringify(latestCompiledBundle.brief, null, 2), "application/json");
+  });
+  downloadScaffoldBtn.addEventListener("click", () => {
+    if (!latestCompiledBundle) return;
+    downloadTextFile("hynous-scaffold.txt", latestCompiledBundle.scaffoldText, "text/plain");
+  });
   rerollGalleryBtn.addEventListener("click", () => {
     renderPipelineGallery();
     touchAsh();
   });
+}
+
+function attachTarotHandlers() {
+  generateTarotBtn.addEventListener("click", generateTarotImage);
 }
 
 function attachGlobalActivityHandlers() {
@@ -348,19 +378,22 @@ async function refreshProviderStatus() {
 async function compileFoundryBrief() {
   compileStatus.textContent = "Compiling personal brief…";
   pulseButton(compileBtn);
+  const payload = gatherFoundryPayload();
 
   try {
     const result = await apiJson("/api/foundry/brief", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(gatherFoundryPayload())
+      body: JSON.stringify(payload)
     });
 
     renderBrief(result.brief);
     const failureCount = Array.isArray(result.failures) ? result.failures.length : 0;
     compileStatus.textContent = `Compiled via ${result.provider}${failureCount ? ` with ${failureCount} fallback event(s)` : ""}.`;
   } catch (error) {
-    compileStatus.textContent = `Compilation failed: ${error.message}`;
+    const emulated = emulateFoundryBrief(payload);
+    renderBrief(emulated);
+    compileStatus.textContent = `API unavailable. Rendered local emulation instead: ${error.message}`;
   }
 }
 
@@ -393,6 +426,7 @@ function gatherFoundryPayload() {
 }
 
 function renderBrief(brief) {
+  latestCompiledBundle = buildCompiledBundle(brief, gatherFoundryPayload());
   briefTitle.textContent = "Compiled PersonalBrief";
   briefSummary.textContent = brief?.portrait?.summary || "No portrait summary returned.";
   briefArchetypes.innerHTML = (brief?.archetypes || ["Awaiting archetypes"])
@@ -401,11 +435,194 @@ function renderBrief(brief) {
   briefCapabilities.innerHTML = listItems(brief?.capabilities);
   briefContract.innerHTML = listItems(brief?.behavioralContract);
   briefPlan.innerHTML = listItems(brief?.implementationPlan);
+  briefHypotheses.innerHTML = listHypotheses(brief?.hypotheses);
+  briefUi.innerHTML = listItems(brief?.uiRecommendations);
+  briefAgents.innerHTML = listItems(brief?.buildAgents);
+  briefNotes.innerHTML = listItems(brief?.notesForReview);
+  briefSchema.textContent = latestCompiledBundle.schemaText;
+  briefPromptPack.textContent = latestCompiledBundle.promptPackText;
+  briefScaffold.textContent = latestCompiledBundle.scaffoldText;
+}
+
+function emulateFoundryBrief(payload) {
+  const arcana = payload.symbolic.arcana.length ? payload.symbolic.arcana : ["Forge", "Lantern"];
+  const privacy = payload.practical.privacy || "balanced privacy with explicit consent";
+  const mode = payload.behavioral.collaborationMode || "Collaborator with visible structure";
+  const ambiguity = payload.behavioral.ambiguityTolerance || "Medium";
+  const domains = payload.practical.primaryDomains
+    ? payload.practical.primaryDomains.split(",").map((item) => item.trim()).filter(Boolean)
+    : ["architecture", "research", "implementation"];
+
+  const wantsPrivacy = /private|local|consent|strict/i.test(privacy);
+  const wantsPlurality = arcana.includes("Chorus");
+  const wantsDurability = arcana.includes("Archive");
+  const wantsVerification = arcana.includes("Lantern");
+  const wantsRevision = arcana.includes("Forge") || arcana.includes("Mirror");
+
+  return {
+    portrait: {
+      summary: `Emulated brief: this user appears to want a ${mode.toLowerCase()} harness with ${privacy.toLowerCase()} and ${ambiguity.toLowerCase()} ambiguity handling.`,
+      workstyle: [
+        payload.behavioral.workingRhythm || "mixed deep-work and opportunistic capture",
+        wantsRevision ? "iterative and revision-tolerant" : "prefers convergent output",
+        "expects explicit structure and reusable artifacts"
+      ],
+      aiRelationship: [
+        mode,
+        wantsPlurality ? "comfortable with multi-agent plurality if merge is explicit" : "prefers a single coherent interface",
+        wantsVerification ? "trust depends on visible evidence and uncertainty" : "accepts best-effort synthesis with later correction"
+      ],
+      operationalNeeds: [
+        payload.practical.hosting || "static frontend plus hosted or local inference backend",
+        payload.practical.devices || "desktop-first with mobile fallback",
+        wantsPrivacy ? "reviewable persistence and explicit consent gates" : "durable history with configurable retention"
+      ]
+    },
+    archetypes: Array.from(new Set([
+      wantsPlurality ? "Switchboard" : "Foundry",
+      wantsDurability ? "Conservatory" : "Atelier",
+      wantsPrivacy ? "Shrine" : "Observatory"
+    ])),
+    capabilities: [
+      "three-strata intake compiler",
+      "editable preference hypotheses",
+      wantsPlurality ? "agent compare-and-merge surfaces" : "single-thread structured collaboration",
+      wantsDurability ? "durable logs and replay" : "lightweight session persistence",
+      wantsVerification ? "evidence and confidence channels" : "fast synthesis with revision hooks",
+      ...domains.map((domain) => `${domain} workflow support`)
+    ],
+    behavioralContract: [
+      "keep uncertainty visible",
+      wantsPrivacy ? "ask before durable memory writes" : "make memory controls explicit",
+      wantsPlurality ? "do not hide agent disagreement" : "do not produce false plurality for its own sake",
+      wantsRevision ? "preserve branch history and revision paths" : "prefer concise and direct forward motion"
+    ],
+    hypotheses: [
+      {
+        claim: "The user wants symbolic frontstage only if it compiles into explicit tooling behavior.",
+        confidence: "high",
+        evidence: [payload.symbolic.motifs || "symbolic motifs requested", arcana.join(", ")]
+      },
+      {
+        claim: wantsPrivacy
+          ? "Trust depends on reviewable persistence and explicit consent."
+          : "Trust depends more on continuity and inspectability than on strict minimal retention.",
+        confidence: "medium",
+        evidence: [privacy, payload.behavioral.painPoints || "stated pain points"]
+      }
+    ],
+    uiRecommendations: [
+      wantsPlurality ? "Use compare-and-merge panes for agent outputs." : "Keep a primary single-thread workbench as default.",
+      wantsVerification ? "Expose evidence drawers and confidence markers." : "Prefer direct synthesis with optional drill-down.",
+      wantsRevision ? "Preserve branch history and side-by-side iteration diffs." : "Keep the interface concise under overload."
+    ],
+    implementationPlan: [
+      "stabilize the PersonalBrief schema as the core artifact",
+      "connect symbolic arcana to explicit parameter bundles",
+      "add inference evidence and contradiction review",
+      "only then expand to persistent memory and automated build launch"
+    ],
+    buildAgents: [
+      "Interview Interpreter",
+      "Personal Ontologist",
+      wantsPlurality ? "Multi-Agent Conductor" : "Single-Thread Product Architect",
+      "Prompt and Policy Engineer",
+      "Systems Builder",
+      "Reviewer and Critic"
+    ],
+    notesForReview: [
+      "This local emulation favors coherence over novelty.",
+      wantsPrivacy ? "Validate memory policy before trace ingestion." : "Prototype continuity features before adding more symbolism."
+    ]
+  };
+}
+
+function buildCompiledBundle(brief, payload) {
+  const schema = {
+    user_portrait: {
+      summary: brief?.portrait?.summary || "",
+      workstyle: brief?.portrait?.workstyle || [],
+      ai_relationship: brief?.portrait?.aiRelationship || [],
+      operational_needs: brief?.portrait?.operationalNeeds || []
+    },
+    symbolic_priors: payload.symbolic.arcana,
+    behavioral_contract: brief?.behavioralContract || [],
+    capabilities: brief?.capabilities || [],
+    ui_recommendations: brief?.uiRecommendations || [],
+    build_agents: brief?.buildAgents || []
+  };
+
+  const promptPack = [
+    "SYSTEM PROMPT",
+    "You are the primary assistant inside a personal AI harness shaped by Ἑυνοῦς.",
+    "",
+    "OPERATING CONTRACT",
+    ...(brief?.behavioralContract || []).map((item) => `- ${item}`),
+    "",
+    "WORKSTYLE",
+    ...((brief?.portrait?.workstyle || []).map((item) => `- ${item}`)),
+    "",
+    "CAPABILITIES TO EMPHASIZE",
+    ...((brief?.capabilities || []).slice(0, 8).map((item) => `- ${item}`))
+  ].join("\n");
+
+  const scaffold = [
+    "app/",
+    "  index.html            # workbench shell",
+    "  src/foundry.js        # intake compiler UI",
+    "  src/brief-render.js   # brief and hypothesis rendering",
+    "  src/tarot.js          # symbolic card and image flow",
+    "api/",
+    "  server.mjs            # provider routing and foundry endpoints",
+    "  prompt-pack.json      # exported system and agent contracts",
+    "  personal-brief.json   # compiled brief artifact",
+    "",
+    "Example personal-brief.json excerpt:",
+    JSON.stringify(schema, null, 2)
+  ].join("\n");
+
+  return {
+    brief,
+    schemaText: JSON.stringify(schema, null, 2),
+    promptPackText: promptPack,
+    scaffoldText: scaffold
+  };
 }
 
 function renderPipelineGallery() {
   const variants = shuffle([...gallerySeeds]).slice(0, 3).map(emulatePipelineProduct);
   galleryEl.innerHTML = variants.map(renderGalleryCard).join("");
+}
+
+function seedTarotPreview() {
+  const card = tarotCardSelect.value;
+  const motif = tarotMotifInput.value.trim();
+  tarotPrompt.textContent = localTarotPrompt(card, motif);
+  tarotImage.src = localTarotFallback(card, motif);
+  tarotStatus.textContent = "Ready. Generate to hit the backend image endpoint.";
+}
+
+async function generateTarotImage() {
+  const card = tarotCardSelect.value;
+  const motif = tarotMotifInput.value.trim();
+  tarotStatus.textContent = "Generating tarot image…";
+  tarotPrompt.textContent = localTarotPrompt(card, motif);
+  pulseButton(generateTarotBtn);
+
+  try {
+    const result = await apiJson("/api/tarot-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ card, motif })
+    });
+    tarotImage.src = result.imageDataUrl;
+    tarotPrompt.textContent = result.prompt || localTarotPrompt(card, motif);
+    tarotStatus.textContent = `Generated via ${result.provider}${result.warnings?.length ? " with fallback note" : ""}.`;
+  } catch (error) {
+    tarotImage.src = localTarotFallback(card, motif);
+    tarotPrompt.textContent = localTarotPrompt(card, motif);
+    tarotStatus.textContent = `API unavailable. Rendered local fallback instead: ${error.message}`;
+  }
 }
 
 function emulatePipelineProduct(seed) {
@@ -444,6 +661,38 @@ function emulatePipelineProduct(seed) {
   return output;
 }
 
+function localTarotPrompt(card, motif) {
+  return `${card}, tarot card illustration, ${motif}, ornate vertical composition, symbolic archetype, warm bark and ash palette, woodgrain textures, subtle ember light, high detail, no text, no watermark, no logo`;
+}
+
+function localTarotFallback(card, motif) {
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="768" height="1152" viewBox="0 0 768 1152">
+    <defs>
+      <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="#233d32"/>
+        <stop offset="52%" stop-color="#4b2e2a"/>
+        <stop offset="100%" stop-color="#8a5a44"/>
+      </linearGradient>
+      <radialGradient id="ember" cx="50%" cy="42%" r="26%">
+        <stop offset="0%" stop-color="#fff4e2"/>
+        <stop offset="30%" stop-color="#ffc15c"/>
+        <stop offset="65%" stop-color="#ff8740"/>
+        <stop offset="100%" stop-color="rgba(179,63,43,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="768" height="1152" rx="40" fill="url(#bg)"/>
+    <rect x="28" y="28" width="712" height="1096" rx="30" fill="none" stroke="#f5e9d3" stroke-opacity="0.52" stroke-width="2"/>
+    <circle cx="384" cy="396" r="150" fill="rgba(255,244,226,0.05)" stroke="#f5e9d3" stroke-opacity="0.14"/>
+    <circle cx="384" cy="396" r="102" fill="url(#ember)"/>
+    <path d="M150 618 C250 548 316 716 384 628 C446 548 524 704 622 620" fill="none" stroke="#f5e9d3" stroke-opacity="0.48" stroke-width="4" stroke-linecap="round"/>
+    <path d="M174 696 C262 638 324 780 384 712 C446 640 508 772 596 704" fill="none" stroke="#f5e9d3" stroke-opacity="0.28" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="384" y="136" text-anchor="middle" font-family="Georgia, serif" font-size="54" fill="#fff4e2">${escapeXml(card)}</text>
+    <text x="384" y="980" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#f5e9d3" opacity="0.82">${escapeXml(motif)}</text>
+  </svg>`;
+  return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+}
+
 function renderGalleryCard(product) {
   return `
     <article class="panel-card gallery-card">
@@ -472,6 +721,18 @@ function renderGalleryCard(product) {
 function listItems(items) {
   const source = Array.isArray(items) && items.length ? items : ["No items returned."];
   return source.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
+function listHypotheses(items) {
+  const source = Array.isArray(items) && items.length
+    ? items
+    : [{ claim: "No hypotheses yet.", confidence: "low", evidence: [] }];
+  return source.map((item) => {
+    const evidenceText = Array.isArray(item.evidence) && item.evidence.length
+      ? ` Evidence: ${item.evidence.join("; ")}`
+      : "";
+    return `<li><strong>${escapeHtml(item.claim)}</strong> <span style="color:var(--color-charcoal)">(${escapeHtml(item.confidence || "unknown")})</span>${escapeHtml(evidenceText)}</li>`;
+  }).join("");
 }
 
 function loadFoundrySample() {
@@ -740,6 +1001,18 @@ function shuffle(items) {
   return items;
 }
 
+function downloadTextFile(filename, text, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -747,4 +1020,13 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function escapeXml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
