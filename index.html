@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Quota Dashboard — uprootiny</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --dim: #8b949e;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --red: #f85149;
+      --blue: #58a6ff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .subtitle { color: var(--dim); font-size: 13px; margin-bottom: 24px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .card h2 { font-size: 14px; color: var(--dim); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .metric:last-child { border-bottom: none; }
+    .metric-name { font-size: 13px; }
+    .metric-value { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .bar-container { width: 120px; height: 6px; background: var(--border); border-radius: 3px; margin-left: 12px; }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+    .bar-fill.green { background: var(--green); }
+    .bar-fill.yellow { background: var(--yellow); }
+    .bar-fill.red { background: var(--red); }
+    .metric-right { display: flex; align-items: center; gap: 8px; }
+    .status { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+    .status.ok { background: var(--green); }
+    .status.warn { background: var(--yellow); }
+    .status.crit { background: var(--red); }
+    .refresh-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .refresh-btn:hover { border-color: var(--blue); }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .last-updated { color: var(--dim); font-size: 12px; margin-top: 8px; }
+    .token-input { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 13px; width: 260px; margin-right: 8px; }
+    .setup { margin-bottom: 24px; }
+    #error { color: var(--red); font-size: 13px; margin-top: 8px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>GitHub Quota Dashboard</h1>
+      <div class="subtitle">uprootiny — tracking usage across API, Actions, Packages, Storage</div>
+    </div>
+    <button class="refresh-btn" onclick="refresh()">Refresh</button>
+  </div>
+
+  <div class="setup" id="setup">
+    <input type="password" class="token-input" id="token" placeholder="GitHub token (ghp_... or gho_...)">
+    <button class="refresh-btn" onclick="saveToken()">Connect</button>
+    <div id="error"></div>
+  </div>
+
+  <div class="grid" id="dashboard"></div>
+  <div class="last-updated" id="updated"></div>
+
+  <script src="src/dashboard.js"></script>
+</body>
+</html>
