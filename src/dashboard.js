@@ -2,6 +2,7 @@ const API = "https://api.github.com";
 const USER = "uprootiny";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const API_BASE_KEY = "hynous_api_base";
+const POLLINATIONS = "https://image.pollinations.ai/prompt/";
 
 let token = localStorage.getItem("gh_token") || "";
 let idleTimer = null;
@@ -659,14 +660,15 @@ function seedTarotPreview() {
   const motif = tarotMotifInput.value.trim();
   tarotPrompt.textContent = localTarotPrompt(card, motif);
   tarotImage.src = localTarotFallback(card, motif);
-  tarotStatus.textContent = "Ready. Generate to hit the backend image endpoint.";
+  tarotStatus.textContent = "Ready. Generate to use the relay or free fallback image path.";
 }
 
 async function generateTarotImage() {
   const card = tarotCardSelect.value;
   const motif = tarotMotifInput.value.trim();
+  const prompt = localTarotPrompt(card, motif);
   tarotStatus.textContent = "Generating tarot image…";
-  tarotPrompt.textContent = localTarotPrompt(card, motif);
+  tarotPrompt.textContent = prompt;
   pulseButton(generateTarotBtn);
 
   try {
@@ -676,13 +678,55 @@ async function generateTarotImage() {
       body: JSON.stringify({ card, motif })
     });
     tarotImage.src = result.imageDataUrl;
-    tarotPrompt.textContent = result.prompt || localTarotPrompt(card, motif);
+    tarotPrompt.textContent = result.prompt || prompt;
     tarotStatus.textContent = `Generated via ${result.provider}${result.warnings?.length ? " with fallback note" : ""}.`;
   } catch (error) {
-    tarotImage.src = localTarotFallback(card, motif);
-    tarotPrompt.textContent = localTarotPrompt(card, motif);
-    tarotStatus.textContent = `API unavailable. Rendered local fallback instead: ${error.message}`;
+    try {
+      tarotStatus.textContent = "API unavailable. Falling back to Pollinations.ai…";
+      const pollinationsUrl = pollinationsTarotUrl(prompt);
+      await preloadImage(pollinationsUrl, 45000);
+      tarotImage.src = pollinationsUrl;
+      tarotPrompt.textContent = prompt;
+      tarotStatus.textContent = "Generated via Pollinations.ai (free, unauthenticated fallback).";
+    } catch (fallbackError) {
+      tarotImage.src = localTarotFallback(card, motif);
+      tarotPrompt.textContent = prompt;
+      tarotStatus.textContent = `All remote image paths failed. Rendered local fallback instead: ${fallbackError.message}`;
+    }
   }
+}
+
+function pollinationsTarotUrl(prompt) {
+  return `${POLLINATIONS}${encodeURIComponent(prompt)}?width=512&height=768&nologo=true&seed=${Math.floor(Math.random() * 99999)}`;
+}
+
+function preloadImage(src, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    let settled = false;
+    const timer = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("timeout"));
+    }, timeoutMs);
+
+    img.onload = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      resolve(true);
+    };
+
+    img.onerror = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      reject(new Error("image failed"));
+    };
+
+    img.crossOrigin = "anonymous";
+    img.src = src;
+  });
 }
 
 function emulatePipelineProduct(seed) {
