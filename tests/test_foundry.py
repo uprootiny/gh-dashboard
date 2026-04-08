@@ -17,6 +17,11 @@ class FoundryCliTests(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
         for rel in [
+            Path("benchmarks/suite.json"),
+            Path("examples/schema-scaffold-trace/TRACE.md"),
+            Path("examples/schema-scaffold-trace/task-packet.json"),
+            Path("examples/schema-scaffold-trace/child-run.json"),
+            Path("examples/schema-scaffold-trace/review.json"),
             Path("cards/defs/the-lantern.json"),
             Path("cards/defs/the-forge.json"),
             Path("cards/defs/the-archive.json"),
@@ -167,6 +172,46 @@ class FoundryCliTests(unittest.TestCase):
         agent_runs = json.loads((self.root / "state" / "agent-runs.json").read_text())
         self.assertEqual(agent_runs[-1]["agent"], "gemini")
         self.assertEqual(agent_runs[-1]["degraded_from"], "codex")
+
+    def test_benchmark_runner_emits_report(self) -> None:
+        self.run_script(
+            "intake.py",
+            "--devices",
+            "desktop",
+            "--budget",
+            "balanced",
+            "--hosting",
+            "vps",
+            "--privacy",
+            "consentful memory",
+            "--domains",
+            "architecture",
+            "--collaboration-mode",
+            "visible collaborator",
+            "--ambiguity-tolerance",
+            "medium",
+            "--preferred-outputs",
+            "briefs",
+            "--pain-points",
+            "inspectability",
+            "--working-rhythm",
+            "steady",
+            "--arcana",
+            "Forge,Lantern",
+            "--motifs",
+            "typed ritual",
+            "--trace-notes",
+            "needs explicit structure",
+        )
+        self.run_script("infer_preferences.py")
+        self.run_script("compile_brief.py")
+        self.run_script("route_jobs.py")
+        self.run_script("run_benchmarks.py")
+        report = json.loads((self.root / "state" / "benchmark-report.json").read_text())
+        self.assertEqual(report["summary"]["total"], 5)
+        self.assertGreaterEqual(report["summary"]["passed"], 4)
+        self.assertEqual(report["results"][-1]["class"], "taste-heavy")
+        self.assertEqual(report["results"][-1]["status"], "partial")
 
 
 if __name__ == "__main__":

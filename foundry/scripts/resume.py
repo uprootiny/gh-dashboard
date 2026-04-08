@@ -10,6 +10,7 @@ def main() -> None:
     intake = read_json(root / "inputs" / "intake.json", default={}) or {}
     inference = read_json(root / "state" / "inference.json", default={}) or {}
     jobs = read_json(root / "state" / "jobs.json", default={}) or {}
+    benchmarks = read_json(root / "state" / "benchmark-report.json", default={}) or {}
     agent_runs = read_json(root / "state" / "agent-runs.json", default=[]) or []
     reviews = read_json(root / "state" / "reviews.json", default=[]) or []
 
@@ -43,6 +44,21 @@ def main() -> None:
     for job in jobs.get("jobs", []):
         status = job.get("status", "pending")
         print(f"- {job['id']} -> {job['preferred_agent']} (fallback {job['fallback_agent']}) [{status}]")
+    print("")
+    print("Benchmarks")
+    print("----------")
+    if benchmarks:
+        summary = benchmarks.get("summary", {})
+        print(
+            f"passed: {summary.get('passed', 0)}/{summary.get('total', 0)} "
+            f"partial: {summary.get('partial', 0)} "
+            f"failed: {summary.get('failed', 0)} "
+            f"avg: {summary.get('average_score', 0)}"
+        )
+        for item in benchmarks.get("results", [])[:5]:
+            print(f"- {item['id']}: {item['status']} [{item['class']}]")
+    else:
+        print("No benchmark report yet.")
     print("")
     print("Child runs")
     print("----------")

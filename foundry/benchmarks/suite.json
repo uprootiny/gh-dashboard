@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "methodology": {
+    "focus": "massive easy-to-verify SWE",
+    "classes": {
+      "ES": "easy scoped task with direct pass/fail verification",
+      "ESNI": "easy scoped but needs nontrivial integration and inspection",
+      "taste-heavy": "judgment-heavy task where verification is slower or less objective"
+    },
+    "scoring": {
+      "pass": 1.0,
+      "partial": 0.5,
+      "fail": 0.0
+    }
+  },
+  "benchmarks": [
+    {
+      "id": "foundry-cli-loop",
+      "title": "Foundry parent-child protocol loop",
+      "class": "ESNI",
+      "verification_cost": "low",
+      "source": "tests/test_foundry.py::test_full_pipeline_emits_core_artifacts",
+      "check": {
+        "kind": "command",
+        "cwd": "repo",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests.test_foundry.FoundryCliTests.test_full_pipeline_emits_core_artifacts"
+        ]
+      }
+    },
+    {
+      "id": "agent-fallback-routing",
+      "title": "Child run falls back when preferred agent is unavailable",
+      "class": "ESNI",
+      "verification_cost": "low",
+      "source": "tests/test_foundry.py::test_agent_falls_back_when_preferred_unavailable",
+      "check": {
+        "kind": "command",
+        "cwd": "repo",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests.test_foundry.FoundryCliTests.test_agent_falls_back_when_preferred_unavailable"
+        ]
+      }
+    },
+    {
+      "id": "web-critical-paths",
+      "title": "Live app shells and relay endpoints survive smoke validation",
+      "class": "ES",
+      "verification_cost": "low",
+      "source": "tests/web_smoke.mjs",
+      "check": {
+        "kind": "command",
+        "cwd": "repo",
+        "argv": [
+          "node",
+          "tests/web_smoke.mjs"
+        ]
+      }
+    },
+    {
+      "id": "trace-example-presence",
+      "title": "Curated parent-child trace bundle is present for inspection",
+      "class": "ES",
+      "verification_cost": "very-low",
+      "source": "foundry/examples/schema-scaffold-trace",
+      "check": {
+        "kind": "files_exist",
+        "paths": [
+          "examples/schema-scaffold-trace/TRACE.md",
+          "examples/schema-scaffold-trace/task-packet.json",
+          "examples/schema-scaffold-trace/child-run.json",
+          "examples/schema-scaffold-trace/review.json"
+        ]
+      }
+    },
+    {
+      "id": "ui-meaning-benchmark",
+      "title": "Interface intentionality remains a taste-heavy benchmark",
+      "class": "taste-heavy",
+      "verification_cost": "high",
+      "source": "manual review",
+      "check": {
+        "kind": "manual_note",
+        "message": "Requires human review of interaction density, symbolic restraint, and visual coherence."
+      }
+    }
+  ]
+}

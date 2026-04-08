@@ -13,6 +13,7 @@ commands:
   infer          derive preference hypotheses from intake
   compile        build PersonalBrief from intake + inference
   build          write routed task files from the brief
+  benchmark      run the local benchmark suite and score benchmark classes
   run-agent      execute a bounded child-agent job packet
   accept-output  record parent review on a child result
   tarot-render   render tarot prompt specs and placeholder assets
@@ -35,6 +36,9 @@ case "$command" in
     ;;
   build)
     exec "$PYTHON_BIN" "$ROOT_DIR/scripts/route_jobs.py" "$ROOT_DIR" "$@"
+    ;;
+  benchmark)
+    exec "$PYTHON_BIN" "$ROOT_DIR/scripts/run_benchmarks.py" "$ROOT_DIR" "$@"
     ;;
   run-agent)
     exec "$PYTHON_BIN" "$ROOT_DIR/scripts/run_agent.py" "$ROOT_DIR" "$@"
