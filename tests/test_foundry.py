@@ -18,6 +18,9 @@ class FoundryCliTests(unittest.TestCase):
         self.root = Path(self.temp_dir.name)
         for rel in [
             Path("benchmarks/suite.json"),
+            Path("design/wizard-flow.json"),
+            Path("design/major-arcana.json"),
+            Path("design/compilation-matrix.json"),
             Path("examples/schema-scaffold-trace/TRACE.md"),
             Path("examples/schema-scaffold-trace/task-packet.json"),
             Path("examples/schema-scaffold-trace/child-run.json"),
@@ -212,6 +215,11 @@ class FoundryCliTests(unittest.TestCase):
         self.assertGreaterEqual(report["summary"]["passed"], 4)
         self.assertEqual(report["results"][-1]["class"], "taste-heavy")
         self.assertEqual(report["results"][-1]["status"], "partial")
+
+    def test_design_assets_validate(self) -> None:
+        result = self.run_script("validate_design.py")
+        self.assertIn("Design assets valid", result.stdout)
+        self.assertIn("major_arcana: 22", result.stdout)
 
 
 if __name__ == "__main__":

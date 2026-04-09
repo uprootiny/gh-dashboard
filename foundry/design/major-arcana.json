@@ -1,0 +1,209 @@
+{
+  "version": 1,
+  "cards": [
+    {
+      "id": "the-fool",
+      "number": 0,
+      "title": "The Fool",
+      "meaning": "open beginning",
+      "harness_signal": ["exploration", "lightweight onboarding", "sandbox flows"],
+      "parameters": {"onboarding_depth": "low", "novelty_tolerance": "high", "scaffold_mode": "exploratory"},
+      "shadow": "drift without consolidation"
+    },
+    {
+      "id": "the-magician",
+      "number": 1,
+      "title": "The Magician",
+      "meaning": "instrumentality",
+      "harness_signal": ["tool-rich environment", "composable actions", "manual control"],
+      "parameters": {"tool_surface_density": "high", "composability": "high", "manual_override": "strong"},
+      "shadow": "clutter and control addiction"
+    },
+    {
+      "id": "the-high-priestess",
+      "number": 2,
+      "title": "The High Priestess",
+      "meaning": "latency of knowing",
+      "harness_signal": ["quiet inference", "reflective prompting", "low-noise interface"],
+      "parameters": {"proactive_inference": "medium", "interface_noise": "low", "suggestion_style": "quiet"},
+      "shadow": "opacity"
+    },
+    {
+      "id": "the-empress",
+      "number": 3,
+      "title": "The Empress",
+      "meaning": "fertility and generativity",
+      "harness_signal": ["broad ideation", "co-creation", "associative generation"],
+      "parameters": {"generation_breadth": "high", "brainstorming_mode": "enabled", "affect_tone": "warm"},
+      "shadow": "excess without discipline"
+    },
+    {
+      "id": "the-emperor",
+      "number": 4,
+      "title": "The Emperor",
+      "meaning": "structure and command",
+      "harness_signal": ["schemas", "plan-first workflows", "governance"],
+      "parameters": {"schema_rigidity": "high", "workflow_explicitness": "high", "permission_boundaries": "strong"},
+      "shadow": "bureaucratic rigidity"
+    },
+    {
+      "id": "the-hierophant",
+      "number": 5,
+      "title": "The Hierophant",
+      "meaning": "tradition and transmission",
+      "harness_signal": ["tutorial flows", "canonical exemplars", "curriculum scaffolds"],
+      "parameters": {"pedagogy_strength": "high", "canonical_reference_bias": "high", "exercise_generation": "enabled"},
+      "shadow": "stale conventionality"
+    },
+    {
+      "id": "the-lovers",
+      "number": 6,
+      "title": "The Lovers",
+      "meaning": "alignment and choice",
+      "harness_signal": ["behavioral contract", "tradeoff clarity", "preference coherence"],
+      "parameters": {"contract_visibility": "high", "contradiction_detection": "enabled", "preference_conflict_resolution": "prominent"},
+      "shadow": "indecision"
+    },
+    {
+      "id": "the-chariot",
+      "number": 7,
+      "title": "The Chariot",
+      "meaning": "directed momentum",
+      "harness_signal": ["task progression", "milestones", "next-step bias"],
+      "parameters": {"proactive_next_steps": "high", "progress_tracking": "enabled", "task_focus": "strong"},
+      "shadow": "over-acceleration"
+    },
+    {
+      "id": "strength",
+      "number": 8,
+      "title": "Strength",
+      "meaning": "gentle power",
+      "harness_signal": ["calm support", "anti-overwhelm pacing", "steadiness"],
+      "parameters": {"tone": "calm", "overload_detection": "enabled", "pacing_adaptation": "high"},
+      "shadow": "excessive softness"
+    },
+    {
+      "id": "the-hermit",
+      "number": 9,
+      "title": "The Hermit",
+      "meaning": "solitude and reflection",
+      "harness_signal": ["local-first privacy", "deep quiet research", "minimal interruption"],
+      "parameters": {"privacy_posture": "strong", "notifications": "sparse", "local_processing_preference": "high"},
+      "shadow": "isolation"
+    },
+    {
+      "id": "wheel-of-fortune",
+      "number": 10,
+      "title": "Wheel of Fortune",
+      "meaning": "cycles and contingency",
+      "harness_signal": ["periodic resurfacing", "adaptive behavior by time", "recurring reviews"],
+      "parameters": {"resurfacing_schedule": "enabled", "temporal_adaptation": "high", "context_sensitive_modes": "enabled"},
+      "shadow": "instability"
+    },
+    {
+      "id": "justice",
+      "number": 11,
+      "title": "Justice",
+      "meaning": "evidence and audit",
+      "harness_signal": ["citations", "provenance", "explicit confidence", "audit trails"],
+      "parameters": {"evidence_visibility": "high", "provenance_required": true, "confidence_channels": "on"},
+      "shadow": "over-legalistic friction"
+    },
+    {
+      "id": "the-hanged-man",
+      "number": 12,
+      "title": "The Hanged Man",
+      "meaning": "suspension and reframing",
+      "harness_signal": ["alternative framings", "deliberate pause", "reinterpretation tools"],
+      "parameters": {"auto_reframe_suggestions": "enabled", "precommit_pause": "optional", "answer_finality_bias": "low"},
+      "shadow": "paralysis by reframing"
+    },
+    {
+      "id": "death",
+      "number": 13,
+      "title": "Death",
+      "meaning": "transformation and pruning",
+      "harness_signal": ["aggressive refactor", "archive and replace", "stale memory decay"],
+      "parameters": {"stale_memory_decay": "enabled", "refactor_bias": "high", "deprecation_visibility": "clear"},
+      "shadow": "premature deletion"
+    },
+    {
+      "id": "temperance",
+      "number": 14,
+      "title": "Temperance",
+      "meaning": "balance and blending",
+      "harness_signal": ["hybrid modes", "slider tradeoffs", "contextual policy composition"],
+      "parameters": {"blended_mode_support": "strong", "parameter_tunability": "high", "context_overrides": "enabled"},
+      "shadow": "too many nuanced controls"
+    },
+    {
+      "id": "the-devil",
+      "number": 15,
+      "title": "The Devil",
+      "meaning": "binding and lock-in",
+      "harness_signal": ["dependency alerts", "anti-lock-in controls", "compulsive pattern detection"],
+      "parameters": {"vendor_lockin_sensitivity": "high", "session_dependency_alerts": "enabled", "break_nudges": "enabled"},
+      "shadow": "moralizing UX"
+    },
+    {
+      "id": "the-tower",
+      "number": 16,
+      "title": "The Tower",
+      "meaning": "rupture and hard truth",
+      "harness_signal": ["strong failure diagnostics", "crash clarity", "disaster recovery"],
+      "parameters": {"error_explanation_depth": "high", "snapshot_before_risk": "enabled", "brittle_magic_tolerance": "low"},
+      "shadow": "too much alarm"
+    },
+    {
+      "id": "the-star",
+      "number": 17,
+      "title": "The Star",
+      "meaning": "orientation and long horizon",
+      "harness_signal": ["north-star tracking", "values-led continuity", "aspirational coherence"],
+      "parameters": {"long_horizon_goal_tracking": "enabled", "mission_visibility": "medium-high", "aspiration_binding": "enabled"},
+      "shadow": "vague uplift without execution"
+    },
+    {
+      "id": "the-moon",
+      "number": 18,
+      "title": "The Moon",
+      "meaning": "ambiguity and symbolic depth",
+      "harness_signal": ["poetic interfaces", "associative exploration", "metaphorical prompting"],
+      "parameters": {"symbolic_ui_layer": "enabled", "ambiguity_tolerance": "high", "associative_generation": "high"},
+      "shadow": "obscurity"
+    },
+    {
+      "id": "the-sun",
+      "number": 19,
+      "title": "The Sun",
+      "meaning": "clarity and visibility",
+      "harness_signal": ["plain summaries", "obvious state", "transparent next action"],
+      "parameters": {"summary_frequency": "high", "state_visibility": "high", "ambiguity_reduction": "high"},
+      "shadow": "flattening complexity"
+    },
+    {
+      "id": "judgement",
+      "number": 20,
+      "title": "Judgement",
+      "meaning": "review and re-evaluation",
+      "harness_signal": ["retrospectives", "pattern recognition over history", "self-revision prompts"],
+      "parameters": {"retrospective_generation": "enabled", "periodic_review": "enabled", "cross_session_pattern_mining": "enabled"},
+      "shadow": "too much review"
+    },
+    {
+      "id": "the-world",
+      "number": 21,
+      "title": "The World",
+      "meaning": "integration and completion",
+      "harness_signal": ["unified environment", "integrated tools", "artifact unification"],
+      "parameters": {"cross_tool_integration": "high", "coherent_state_model": "required", "artifact_unification": "strong"},
+      "shadow": "over-integration"
+    }
+  ],
+  "suit_overlays": [
+    {"id": "wands", "meaning": "action, orchestration, agency"},
+    {"id": "cups", "meaning": "tone, care, trust"},
+    {"id": "swords", "meaning": "analysis, critique, precision"},
+    {"id": "pentacles", "meaning": "infrastructure, persistence, embodiment"}
+  ]
+}

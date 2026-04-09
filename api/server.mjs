@@ -3,6 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import { createReadStream, existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { handleFoundryRoute } from "./foundry-api.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -119,6 +120,16 @@ createServer(async (req, res) => {
           warnings: [error.message || "Remote image generation failed; returned SVG fallback."]
         });
       }
+    }
+
+    // Foundry state API (trace ledger, task envelopes, acceptance, frames)
+    if (url.pathname.startsWith("/api/foundry/") && url.pathname !== "/api/foundry/brief") {
+      const handled = await handleFoundryRoute(
+        req, url,
+        (status, payload) => writeJson(res, status, payload),
+        readJsonBody
+      );
+      if (handled !== false) return;
     }
 
     if (req.method === "GET" || req.method === "HEAD") {

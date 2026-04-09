@@ -25,12 +25,13 @@ jobs:
       - uses: actions/configure-pages@v5
       - name: Prepare static artifact
         run: |
-          mkdir -p dist-pages/src dist-pages/tarot dist-pages/ops
+          mkdir -p dist-pages/src dist-pages/tarot dist-pages/ops dist-pages/orbital
           cp index.html dist-pages/index.html
           cp .nojekyll dist-pages/.nojekyll
           cp src/dashboard.js dist-pages/src/dashboard.js
           cp -R tarot/. dist-pages/tarot/
           cp -R ops/. dist-pages/ops/
+          cp -R orbital/. dist-pages/orbital/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist-pages

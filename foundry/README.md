@@ -20,6 +20,8 @@ From the repo root:
 ./foundry/bin/foundry infer
 ./foundry/bin/foundry compile
 ./foundry/bin/foundry build
+./foundry/bin/foundry design-validate
+./foundry/bin/foundry benchmark
 ./foundry/bin/foundry tarot-render --card the-lantern
 ./foundry/bin/foundry resume
 ```
@@ -47,6 +49,11 @@ This seed implements:
 - preference inference
 - brief compilation
 - routed task generation
+- machine-readable wizard flow
+- machine-readable 22-card arcana deck
+- compilation matrix for card/question effects
+- design asset validation
+- local benchmark suite
 - tarot prompt/render metadata generation
 - resumable state inspection
 

@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "parameter_clusters": [
+    "interaction_style",
+    "reasoning_visibility",
+    "agent_topology",
+    "memory_policy",
+    "privacy_policy",
+    "verification_policy",
+    "ui_topology",
+    "aesthetic_motif",
+    "learning_mode",
+    "branching_and_versioning",
+    "orchestration_and_tools",
+    "tempo_and_notification_policy"
+  ],
+  "card_weights": {
+    "the-fool": {"interaction_style": 0.4, "aesthetic_motif": 0.3, "tempo_and_notification_policy": 0.5},
+    "the-magician": {"orchestration_and_tools": 0.95, "ui_topology": 0.6, "interaction_style": 0.4},
+    "the-high-priestess": {"interaction_style": 0.5, "reasoning_visibility": 0.3, "privacy_policy": 0.4},
+    "the-empress": {"interaction_style": 0.7, "aesthetic_motif": 0.6, "tempo_and_notification_policy": 0.4},
+    "the-emperor": {"ui_topology": 0.8, "orchestration_and_tools": 0.5, "branching_and_versioning": 0.4},
+    "the-hierophant": {"learning_mode": 0.95, "reasoning_visibility": 0.5, "interaction_style": 0.3},
+    "the-lovers": {"interaction_style": 0.5, "verification_policy": 0.4, "privacy_policy": 0.3},
+    "the-chariot": {"tempo_and_notification_policy": 0.9, "interaction_style": 0.4, "orchestration_and_tools": 0.4},
+    "strength": {"interaction_style": 0.6, "tempo_and_notification_policy": 0.7, "aesthetic_motif": 0.4},
+    "the-hermit": {"privacy_policy": 0.95, "interaction_style": 0.4, "ui_topology": 0.3},
+    "wheel-of-fortune": {"memory_policy": 0.5, "tempo_and_notification_policy": 0.85, "interaction_style": 0.3},
+    "justice": {"verification_policy": 0.95, "reasoning_visibility": 0.8, "memory_policy": 0.5},
+    "the-hanged-man": {"reasoning_visibility": 0.6, "interaction_style": 0.5, "verification_policy": 0.3},
+    "death": {"memory_policy": 0.65, "branching_and_versioning": 0.55, "orchestration_and_tools": 0.35},
+    "temperance": {"interaction_style": 0.6, "tempo_and_notification_policy": 0.5, "ui_topology": 0.4},
+    "the-devil": {"privacy_policy": 0.5, "memory_policy": 0.4, "verification_policy": 0.3},
+    "the-tower": {"verification_policy": 0.7, "branching_and_versioning": 0.6, "orchestration_and_tools": 0.4},
+    "the-star": {"aesthetic_motif": 0.5, "interaction_style": 0.4, "tempo_and_notification_policy": 0.4},
+    "the-moon": {"aesthetic_motif": 0.95, "interaction_style": 0.6, "reasoning_visibility": 0.3},
+    "the-sun": {"reasoning_visibility": 0.8, "interaction_style": 0.7, "ui_topology": 0.4},
+    "judgement": {"memory_policy": 0.7, "verification_policy": 0.5, "branching_and_versioning": 0.4},
+    "the-world": {"orchestration_and_tools": 0.7, "ui_topology": 0.6, "memory_policy": 0.4}
+  },
+  "question_mappings": [
+    {
+      "screen_id": "process-visibility",
+      "choice": "visible intermediate structure",
+      "effects": {"reasoning_visibility": 0.8, "verification_policy": 0.3}
+    },
+    {
+      "screen_id": "process-visibility",
+      "choice": "compare-and-merge candidates",
+      "effects": {"agent_topology": 0.6, "branching_and_versioning": 0.8}
+    },
+    {
+      "screen_id": "memory-topology",
+      "choice": "default-on memory",
+      "effects": {"memory_policy": 0.85}
+    },
+    {
+      "screen_id": "memory-topology",
+      "choice": "default-off memory",
+      "effects": {"privacy_policy": 0.85}
+    },
+    {
+      "screen_id": "interface-topology",
+      "choice": "split workbench",
+      "effects": {"ui_topology": 0.8, "reasoning_visibility": 0.4}
+    },
+    {
+      "screen_id": "interface-topology",
+      "choice": "ritual chamber / card-led portal",
+      "effects": {"aesthetic_motif": 0.9, "interaction_style": 0.4}
+    },
+    {
+      "screen_id": "agent-topology",
+      "choice": "several visible named agents",
+      "effects": {"agent_topology": 0.95, "orchestration_and_tools": 0.5}
+    },
+    {
+      "screen_id": "high-stakes-correctness-mode",
+      "choice": "maximize verification and cite everything",
+      "effects": {"verification_policy": 0.95, "reasoning_visibility": 0.5}
+    }
+  ],
+  "branching_rules": [
+    {
+      "id": "privacy-escalation",
+      "if": [
+        "the-hermit",
+        "consent-and-inference-terms:private local inference only",
+        "memory-topology:default-off memory"
+      ],
+      "then": {
+        "privacy_mode": "privacy-first",
+        "recommended_archetypes": ["Shrine", "Observatory"],
+        "memory_defaults": "off",
+        "agent_compartmentalization": "strong"
+      }
+    },
+    {
+      "id": "orchestration-escalation",
+      "if": [
+        "process-visibility:compare-and-merge candidates",
+        "agent-topology:several visible named agents"
+      ],
+      "then": {
+        "recommended_archetypes": ["Switchboard", "Foundry"],
+        "branch_tree": "prominent",
+        "merge_surfaces": "required"
+      }
+    },
+    {
+      "id": "observatory-mode",
+      "if": [
+        "justice",
+        "high-stakes-correctness-mode:maximize verification and cite everything"
+      ],
+      "then": {
+        "verification_defaults": "evidence-first",
+        "confidence_ribbons": "on",
+        "critique_loops": "default"
+      }
+    }
+  ]
+}

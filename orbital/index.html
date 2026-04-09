@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ἑυνοῦς Orbital Foundry</title>
+  <style>
+    :root {
+      --bg: #0a0c0d;
+      --panel: rgba(19, 22, 24, 0.88);
+      --panel-strong: rgba(13, 15, 16, 0.96);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f4f4f2;
+      --muted: #a5aaa8;
+      --accent: #f0e9dd;
+      --fill: rgba(255, 255, 255, 0.82);
+      --fill-soft: rgba(255, 255, 255, 0.25);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 24%),
+        linear-gradient(180deg, #090909 0%, #111315 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    }
+    .shell {
+      width: min(1400px, calc(100vw - 24px));
+      margin: 0 auto;
+      padding: 20px 0 32px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) 380px;
+      gap: 16px;
+    }
+    .panel {
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+    .panel__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .title-wrap strong {
+      display: block;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+    .title-wrap span {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .controls, .links {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .chip, .links a, .btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 10px 14px;
+      font: inherit;
+      text-decoration: none;
+    }
+    .btn {
+      cursor: pointer;
+    }
+    .btn--solid {
+      background: rgba(255,255,255,0.94);
+      color: #090909;
+    }
+    .canvas-wrap {
+      position: relative;
+      height: 60vh;
+      min-height: 480px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,0.055), rgba(0,0,0,0) 22%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+      touch-action: none;
+    }
+    .canvas-wrap svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .canvas-badges {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .sidebar {
+      display: grid;
+      gap: 16px;
+    }
+    .card {
+      padding: 16px;
+    }
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .metric, .mode-card {
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--panel-strong);
+      padding: 12px;
+    }
+    .metric label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: capitalize;
+      margin-bottom: 10px;
+    }
+    .bar {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--fill);
+    }
+    .metric small {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+    }
+    .range {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .range input[type="range"] {
+      width: 100%;
+      accent-color: #f4f4f2;
+    }
+    .mode-card strong {
+      display: block;
+      font-size: 1.1rem;
+      text-transform: capitalize;
+      margin-bottom: 6px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .stat {
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--panel-strong);
+      padding: 12px;
+    }
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: capitalize;
+    }
+    .stat strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.4rem;
+    }
+    .mapping p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .mapping strong {
+      color: var(--text);
+    }
+    @media (max-width: 1180px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="layout">
+      <section class="panel">
+        <div class="panel__head">
+          <div class="title-wrap">
+            <strong>Orbital Foundry Demo</strong>
+            <span>Responsive, live, gesture-shaped symbolic mechanics</span>
+          </div>
+          <div class="controls">
+            <span class="chip" id="mode-chip">mode: reverie</span>
+            <span class="chip" id="ring-chip">ring: 3</span>
+            <button class="btn" id="reset-btn" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="canvas-wrap" id="orbital-canvas">
+          <svg id="orbital-svg" viewBox="0 0 900 640" preserveAspectRatio="none" aria-label="Orbital foundry simulation"></svg>
+          <div class="canvas-badges">
+            <span class="chip">drag a ring to consecrate it</span>
+            <span class="chip">stillness biases oracle behavior</span>
+            <span class="chip">neglect slowly changes future response</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="sidebar">
+        <section class="panel card">
+          <div class="links" style="margin-bottom: 12px;">
+            <a href="../">Foundry</a>
+            <a href="../tarot/">Tarot</a>
+            <a href="../ops/">Ops</a>
+          </div>
+          <h2>Temperament of selected orbit</h2>
+          <div class="metric-grid" id="orbit-metrics"></div>
+          <div class="range">
+            <label for="time-scale">Time dilation</label>
+            <input id="time-scale" type="range" min="0.35" max="2.4" step="0.05" value="1">
+            <small id="time-scale-value">1.00x</small>
+          </div>
+          <div class="links" style="margin-top: 12px;">
+            <button class="btn btn--solid" id="trace-toggle" type="button">Traces on</button>
+          </div>
+        </section>
+
+        <section class="panel card">
+          <h2>Inferred attentional posture</h2>
+          <div class="mode-card">
+            <strong id="mode-title">reverie</strong>
+            <div id="mode-description">Soft drift, layered residue, slower semantic thickening.</div>
+          </div>
+          <div class="stats-grid" id="stats-grid"></div>
+        </section>
+
+        <section class="panel card mapping">
+          <h2>Design mapping</h2>
+          <p><strong>Ring</strong> -> recurrence, memory band, obligation residue.</p>
+          <p><strong>Coupling</strong> -> neighboring rings influence each other’s phase.</p>
+          <p><strong>Consecration</strong> -> repeated handling increases persistence and glow.</p>
+          <p><strong>Neglect</strong> -> ignored systems subtly change future response.</p>
+          <p><strong>Fatigue</strong> -> overcontrol dampens responsiveness.</p>
+          <p><strong>Mode inference</strong> -> frontstage play alters the backstage contract.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

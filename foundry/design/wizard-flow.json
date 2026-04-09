@@ -1,0 +1,335 @@
+{
+  "version": 1,
+  "channels": [
+    "practical",
+    "behavioral",
+    "symbolic"
+  ],
+  "compilation_target": [
+    "WizardState",
+    "PreferenceHypotheses",
+    "HarnessArchetypes",
+    "PersonalBrief",
+    "BuildPlan"
+  ],
+  "screen_clusters": [
+    {
+      "id": "threshold",
+      "title": "Threshold / orientation",
+      "screens": [
+        {
+          "id": "welcome-threshold",
+          "purpose": "frame the experience correctly",
+          "outputs": [
+            "relationship_mode",
+            "harness_intent",
+            "archetype_priors"
+          ]
+        },
+        {
+          "id": "consent-and-inference-terms",
+          "purpose": "establish trace inference and evidence rules",
+          "outputs": [
+            "inference_policy",
+            "evidence_visibility",
+            "editable_hypotheses",
+            "forbidden_inference_domains"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intake-substrate",
+      "title": "Intake substrate",
+      "screens": [
+        {
+          "id": "source-materials",
+          "purpose": "identify source corpus and retention classes",
+          "outputs": [
+            "source_corpus_manifest",
+            "retention_classes",
+            "trust_priority_by_source",
+            "active_substrates"
+          ]
+        },
+        {
+          "id": "constraints-and-environment",
+          "purpose": "capture devices, hosting, cost, latency, and offline constraints",
+          "outputs": [
+            "deployment_constraints",
+            "device_priority_order",
+            "cost_profile",
+            "latency_budget",
+            "offline_requirement"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "direct-workstyle",
+      "title": "Direct workstyle elicitation",
+      "screens": [
+        {
+          "id": "thinking-style",
+          "purpose": "derive cognitive style vector and preferred reasoning modes",
+          "outputs": [
+            "cognitive_style_vector",
+            "preferred_reasoning_modes"
+          ]
+        },
+        {
+          "id": "help-style",
+          "purpose": "set assistance posture, interruption tolerance, and proactivity",
+          "outputs": [
+            "assistance_posture",
+            "interruption_tolerance",
+            "proactivity_level"
+          ]
+        },
+        {
+          "id": "process-visibility",
+          "purpose": "set inspectability, candidate multiplicity, and routing visibility",
+          "outputs": [
+            "inspectability_preference",
+            "candidate_multiplicity_preference",
+            "routing_visibility_preference"
+          ]
+        },
+        {
+          "id": "revision-and-debugging-style",
+          "purpose": "set failure interface, debugging affordances, and retention",
+          "outputs": [
+            "failure_interface_style",
+            "debugging_affordance_profile",
+            "test_first_preference",
+            "failure_retention_policy"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tension-spreads",
+      "title": "Tension spreads",
+      "screens": [
+        {
+          "id": "canonical-tensions",
+          "purpose": "record tension profile and contextual overrides",
+          "outputs": [
+            "tension_profile",
+            "contextual_overrides"
+          ],
+          "tensions": [
+            "speed-vs-depth",
+            "autonomy-vs-control",
+            "memory-vs-privacy",
+            "multiplicity-vs-simplicity",
+            "visible-process-vs-seamless-polish",
+            "novelty-vs-reliability",
+            "ritual-vs-utility",
+            "branching-vs-closure"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scene-based",
+      "title": "Scene-based elicitation",
+      "screens": [
+        {
+          "id": "exhausted-late-night-mode",
+          "purpose": "configure low-energy reconstruction behavior",
+          "outputs": [
+            "low_energy_mode",
+            "reconstruction_tolerance",
+            "night_mode_behavior"
+          ]
+        },
+        {
+          "id": "high-stakes-correctness-mode",
+          "purpose": "configure verification and critique loops",
+          "outputs": [
+            "high_stakes_policy",
+            "verification_level",
+            "critique_loop_requirement"
+          ]
+        },
+        {
+          "id": "exploratory-research-mode",
+          "purpose": "configure widening, ontology-first, and exemplar-first behavior",
+          "outputs": [
+            "exploration_strategy",
+            "ontology_first_preference",
+            "exemplar_first_preference"
+          ]
+        },
+        {
+          "id": "learning-mode",
+          "purpose": "configure pedagogical style and challenge",
+          "outputs": [
+            "pedagogical_style",
+            "challenge_level",
+            "language_interleaving_preference",
+            "exercise_frequency"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arcana",
+      "title": "Arcana spread",
+      "screens": [
+        {
+          "id": "major-arcana-selection",
+          "purpose": "choose dominant, supporting, and shadow arcana",
+          "outputs": [
+            "dominant_arcana",
+            "secondary_arcana",
+            "shadow_arcana"
+          ]
+        },
+        {
+          "id": "arcana-calibration",
+          "purpose": "bind chosen arcana to modes and aspiration",
+          "outputs": [
+            "arcana_scope",
+            "arcana_mode_binding",
+            "aspirational_vs_descriptive_weight"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "operational-architecture",
+      "title": "Operational architecture preferences",
+      "screens": [
+        {
+          "id": "agent-topology",
+          "purpose": "choose one-face vs routed multi-agent topology",
+          "outputs": [
+            "agent_topology_preference"
+          ]
+        },
+        {
+          "id": "memory-topology",
+          "purpose": "set memory policy, resurfacing, and editability",
+          "outputs": [
+            "memory_policy",
+            "resurfacing_policy",
+            "memory_editability",
+            "memory_indexing_requirements"
+          ]
+        },
+        {
+          "id": "session-and-branching-model",
+          "purpose": "set branch, snapshot, provenance, and replay defaults",
+          "outputs": [
+            "branching_model",
+            "snapshot_policy",
+            "provenance_visibility",
+            "replay_requirements"
+          ]
+        },
+        {
+          "id": "interface-topology",
+          "purpose": "set UI topology, density, and panel set",
+          "outputs": [
+            "ui_topology",
+            "density_preference",
+            "default_panel_set"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "oath",
+      "title": "Oath / behavioral contract",
+      "screens": [
+        {
+          "id": "hard-boundaries",
+          "purpose": "capture prohibitions that require explicit consent",
+          "outputs": [
+            "hard_prohibitions"
+          ]
+        },
+        {
+          "id": "standing-obligations",
+          "purpose": "capture strong default obligations",
+          "outputs": [
+            "standing_obligations"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inference-review",
+      "title": "Inference review",
+      "screens": [
+        {
+          "id": "hypothesis-board",
+          "purpose": "accept, reject, edit, or defer inferred hypotheses",
+          "outputs": [
+            "accepted_hypotheses",
+            "rejected_hypotheses",
+            "edited_hypotheses"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "outputs",
+      "title": "Outputs",
+      "screens": [
+        {
+          "id": "personal-brief-preview",
+          "purpose": "render portrait, tensions, arcana, capabilities, and contract",
+          "outputs": [
+            "personal_brief_preview"
+          ]
+        },
+        {
+          "id": "harness-archetype-proposals",
+          "purpose": "show candidate harness archetypes and tradeoffs",
+          "outputs": [
+            "candidate_archetypes"
+          ]
+        },
+        {
+          "id": "build-launch-settings",
+          "purpose": "choose which downstream artifacts to generate",
+          "outputs": [
+            "build_outputs"
+          ]
+        },
+        {
+          "id": "export-surfaces",
+          "purpose": "export brief, plan, profile, and card constellation",
+          "outputs": [
+            "export_manifest"
+          ]
+        }
+      ]
+    }
+  ],
+  "mvp_screen_order": [
+    "welcome-threshold",
+    "consent-and-inference-terms",
+    "source-materials",
+    "constraints-and-environment",
+    "thinking-style",
+    "help-style",
+    "process-visibility",
+    "canonical-tensions",
+    "exhausted-late-night-mode",
+    "high-stakes-correctness-mode",
+    "major-arcana-selection",
+    "memory-topology",
+    "session-and-branching-model",
+    "interface-topology",
+    "hard-boundaries",
+    "standing-obligations",
+    "hypothesis-board",
+    "personal-brief-preview",
+    "harness-archetype-proposals",
+    "build-launch-settings"
+  ]
+}

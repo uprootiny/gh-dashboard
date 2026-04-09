@@ -63,6 +63,10 @@ try {
   const opsHtml = await fetchText("/ops/");
   assert.match(opsHtml, /GitHub/i);
 
+  const orbitalHtml = await fetchText("/orbital/");
+  assert.match(orbitalHtml, /Orbital Foundry Demo/);
+  assert.match(orbitalHtml, /Temperament of selected orbit/);
+
   const health = await fetchJson("/api/health");
   assert.equal(health.ok, true);
   assert.ok(Array.isArray(health.providerOrder));

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.uprootiny.hynous-foundry</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/uprootiny/.nix-profile/bin/node</string>
+    <string>api/server.mjs</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/uprootiny/anotherone/onetwennyseven/gh-dashboard</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PORT</key>
+    <string>8788</string>
+    <key>LLM_PROVIDER_ORDER</key>
+    <string>ollama,anthropic,openai,openrouter</string>
+    <key>CORS_ALLOW_ORIGINS</key>
+    <string>http://localhost:8788,http://127.0.0.1:8788,https://uprootiny.github.io</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/uprootiny/Library/Logs/hynous-foundry.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/uprootiny/Library/Logs/hynous-foundry.err</string>
+</dict>
+</plist>
