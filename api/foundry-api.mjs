@@ -16,10 +16,27 @@ async function readJson(relativePath, fallback) {
   }
 }
 
+// Write-lock map to prevent concurrent writes to the same file
+const writeLocks = new Map();
+
 async function writeJson(relativePath, data) {
+  // Wait for any pending write to the same file
+  while (writeLocks.has(relativePath)) {
+    await writeLocks.get(relativePath);
+  }
   const filePath = path.join(FOUNDRY, relativePath);
   await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, JSON.stringify(data, null, 2) + "\n", "utf8");
+  // Atomic write via temp file
+  const tmpPath = filePath + `.tmp.${Date.now()}`;
+  const content = JSON.stringify(data, null, 2) + "\n";
+  const { rename } = await import("node:fs/promises");
+  const promise = writeFile(tmpPath, content, "utf8").then(() => rename(tmpPath, filePath));
+  writeLocks.set(relativePath, promise);
+  try {
+    await promise;
+  } finally {
+    writeLocks.delete(relativePath);
+  }
 }
 
 async function loadCardDefs() {
@@ -310,6 +327,36 @@ export async function handleFoundryRoute(req, url, writeJsonResponse, readJsonBo
     if (p === "/api/foundry/task/issue") {
       const body = await readJsonBody(req);
       return writeJsonResponse(200, await issueTask(body));
+    }
+
+    // Persist a compiled brief (merges web and CLI brief paths)
+    if (p === "/api/foundry/compiled-brief") {
+      const body = await readJsonBody(req);
+      if (!body || typeof body !== "object") {
+        return writeJsonResponse(400, { error: "brief object required" });
+      }
+      body.compiled_at = new Date().toISOString();
+      body.source = body.source || "web";
+      await writeJson("briefs/personal-brief.json", body);
+
+      // Trace the compilation
+      const ledger = await readJson("state/trace-ledger.json", []);
+      ledger.push({
+        "event/type": "brief-compiled",
+        "event/id": `evt-${Date.now()}`,
+        source: body.source,
+        created_at: body.compiled_at
+      });
+      await writeJson("state/trace-ledger.json", ledger);
+
+      // Update session
+      const session = await readJson("state/session.json", {});
+      session.current_stage = "brief-compiled";
+      session.updated_at = body.compiled_at;
+      session.latest_brief_json = "briefs/personal-brief.json";
+      await writeJson("state/session.json", session);
+
+      return writeJsonResponse(200, { saved: true, compiled_at: body.compiled_at });
     }
   }
 

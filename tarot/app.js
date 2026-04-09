@@ -1,5 +1,4 @@
 const POLLINATIONS = "https://image.pollinations.ai/prompt/";
-const RELAY_KEY = "hynous_api_base";
 const METER_KEY = "hynous_tarot_meter_v1";
 const apiBaseInput = document.getElementById("api-base");
 const cardSelect = document.getElementById("card");
@@ -20,7 +19,7 @@ const eventLogEl = document.getElementById("event-log");
 
 let meter = loadMeter();
 
-apiBaseInput.value = localStorage.getItem(RELAY_KEY) || "";
+apiBaseInput.value = window.HynousRuntime.getApiBase();
 seed();
 renderDiagnostics();
 probeDiagnostics();
@@ -31,9 +30,7 @@ generateBtn.addEventListener("click", generate);
 refreshDiagBtn.addEventListener("click", probeDiagnostics);
 
 function persistBase() {
-  const value = apiBaseInput.value.trim().replace(/\/$/, "");
-  if (value) localStorage.setItem(RELAY_KEY, value);
-  else localStorage.removeItem(RELAY_KEY);
+  apiBaseInput.value = window.HynousRuntime.setApiBase(apiBaseInput.value);
   probeDiagnostics();
 }
 
@@ -244,20 +241,15 @@ async function probeDiagnostics() {
   }
 
   try {
-    const [healthRes, capabilitiesRes] = await Promise.all([
-      fetch(`${base}/api/health`),
-      fetch(`${base}/api/capabilities`)
-    ]);
-
-    const health = await healthRes.json();
-    const capabilities = await capabilitiesRes.json();
+    const probe = await window.HynousRuntime.probeRelay();
+    const capabilities = probe.capabilities || { llm: { providers: [] }, images: { relay: { configured: false } } };
     const configured = (capabilities.llm?.providers || [])
       .filter((provider) => provider.configured)
       .map((provider) => `${provider.id}:${provider.model || "configured"}`);
     const imageRelay = capabilities.images?.relay;
 
-    relayStatusEl.textContent = health.ok
-      ? `Reachable. Service ${health.service} responded; configured LLM providers: ${configured.join(", ") || "none"}`
+    relayStatusEl.textContent = probe.healthy
+      ? `Reachable. Relay responded; configured LLM providers: ${configured.join(", ") || "none"}`
       : "Relay responded without healthy status.";
     pollinationsStatusEl.textContent = imageRelay?.configured
       ? `Relay image backend configured: ${imageRelay.provider}:${imageRelay.model}`

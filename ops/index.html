@@ -30,6 +30,7 @@
     .grid { display: grid; grid-template-columns: minmax(300px,.84fr) minmax(0,1.16fr); gap: 18px; }
     .panel, .card { background: var(--panel); border: 1px solid var(--border); border-radius: 24px; padding: 20px; }
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .stack { display: grid; gap: 18px; }
     h1, h2 { margin: 0 0 10px; }
     .status, .updated { color: var(--dim); line-height: 1.7; }
     .metric { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
@@ -39,6 +40,8 @@
     .green { background: var(--ok); }
     .yellow { background: var(--warn); }
     .red { background: var(--bad); }
+    .list { margin: 0; padding-left: 18px; color: var(--dim); line-height: 1.6; }
+    .list li + li { margin-top: 8px; }
     @media (max-width: 920px) { .grid { grid-template-columns: 1fr; } input { min-width: 0; width: 100%; } }
   </style>
 </head>
@@ -57,26 +60,41 @@
     </div>
 
     <div class="grid">
-      <section class="panel">
-        <h2>Connect GitHub</h2>
-        <div class="status">This app calls GitHub directly in the browser. Token remains in localStorage on this device.</div>
-        <div style="height:14px"></div>
-        <input id="token" type="password" placeholder="GitHub token (ghp_... or gho_...)">
-        <div style="height:12px"></div>
-        <div class="links">
-          <button id="connect">Connect</button>
-          <button id="refresh">Refresh</button>
-        </div>
-        <div style="height:14px"></div>
-        <div class="status" id="status">No token stored.</div>
-        <div class="updated" id="updated">Last updated: not yet loaded</div>
-      </section>
+      <div class="stack">
+        <section class="panel">
+          <h2>Connect GitHub</h2>
+          <div class="status">This app calls GitHub directly in the browser. Token remains in localStorage on this device.</div>
+          <div style="height:14px"></div>
+          <input id="token" type="password" placeholder="GitHub token (ghp_... or gho_...)">
+          <div style="height:12px"></div>
+          <input id="api-base" type="text" placeholder="https://your-vps.example.com">
+          <div style="height:12px"></div>
+          <div class="links">
+            <button id="connect">Connect</button>
+            <button id="refresh">Refresh</button>
+            <button id="refresh-relay">Refresh relay</button>
+          </div>
+          <div style="height:14px"></div>
+          <div class="status" id="status">No token stored.</div>
+          <div class="updated" id="updated">Last updated: not yet loaded</div>
+        </section>
+
+        <section class="panel">
+          <h2>Relay and Foundry</h2>
+          <div class="status" id="relay-status">Relay not checked.</div>
+          <div style="height:10px"></div>
+          <ol class="list" id="relay-events">
+            <li>Relay diagnostics will appear here.</li>
+          </ol>
+        </section>
+      </div>
 
       <section class="cards" id="dashboard">
         <article class="card"><h2>Ops Pulse</h2><div class="status">Connect a token to load live metrics.</div></article>
       </section>
     </div>
   </div>
+  <script src="../src/runtime.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

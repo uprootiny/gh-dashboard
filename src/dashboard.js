@@ -1,12 +1,11 @@
 const API = "https://api.github.com";
 const USER = "uprootiny";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const API_BASE_KEY = "hynous_api_base";
 const POLLINATIONS = "https://image.pollinations.ai/prompt/";
 
-let token = localStorage.getItem("gh_token") || "";
+let token = window.HynousRuntime.getGithubToken();
 let idleTimer = null;
-let apiBase = localStorage.getItem(API_BASE_KEY) || defaultApiBase();
+let apiBase = window.HynousRuntime.getApiBase();
 let latestCompiledBundle = null;
 
 const heroInput = document.getElementById("hero-input");
@@ -308,21 +307,9 @@ function attachGlobalActivityHandlers() {
   touchAsh();
 }
 
-function defaultApiBase() {
-  const { origin, hostname } = window.location;
-  if (hostname.endsWith("github.io")) return "";
-  return origin;
-}
-
 function persistApiBase() {
-  apiBase = apiBaseInput.value.trim().replace(/\/$/, "");
-  if (apiBase) {
-    localStorage.setItem(API_BASE_KEY, apiBase);
-  } else {
-    localStorage.removeItem(API_BASE_KEY);
-    apiBase = defaultApiBase();
-    apiBaseInput.value = apiBase;
-  }
+  apiBase = window.HynousRuntime.setApiBase(apiBaseInput.value);
+  apiBaseInput.value = apiBase;
   refreshProviderStatus();
 }
 
@@ -372,7 +359,7 @@ async function refreshProviderStatus() {
   providerOrder.innerHTML = `<span class="pill">Checking providers…</span>`;
 
   try {
-    const info = await apiJson("/api/capabilities", { method: "GET" });
+    const info = await window.HynousRuntime.getCapabilities();
     providerOrder.innerHTML = info.llm.providers
       .map((provider) => `<span class="pill">${escapeHtml(provider.id)}: ${provider.configured ? escapeHtml(provider.model || "configured") : "not configured"}</span>`)
       .join("");
@@ -866,7 +853,7 @@ function loadFoundrySample() {
 }
 
 async function callHarnessChat(prompt) {
-  const result = await apiJson("/api/chat", {
+  const result = await window.HynousRuntime.apiJson("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -882,13 +869,7 @@ async function callHarnessChat(prompt) {
 }
 
 async function apiJson(path, options) {
-  const base = (apiBase || defaultApiBase()).replace(/\/$/, "");
-  if (!base) throw new Error("API base is not configured");
-  const response = await fetch(`${base}${path}`, options);
-  const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
-  if (!response.ok) throw new Error(data.error || `${response.status} ${response.statusText}`);
-  return data;
+  return window.HynousRuntime.apiJson(path, options);
 }
 
 function valueOf(id) {
@@ -899,7 +880,7 @@ function saveToken() {
   token = tokenInput.value.trim();
   if (!token) return showError("Token required");
 
-  localStorage.setItem("gh_token", token);
+  window.HynousRuntime.setGithubToken(token);
   showError("");
   setupCopy.textContent = "Token stored locally. Refresh to pull live GitHub telemetry.";
   refresh();

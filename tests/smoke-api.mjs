@@ -8,6 +8,8 @@ const endpoints = [
   ["GET",  "/api/health"],
   ["GET",  "/api/providers"],
   ["GET",  "/api/capabilities"],
+  ["GET",  "/api/admin/summary"],
+  ["GET",  "/api/admin/events"],
   ["GET",  "/api/foundry/session"],
   ["GET",  "/api/foundry/jobs"],
   ["GET",  "/api/foundry/runs"],

@@ -50,6 +50,9 @@ It retries transient failures up to `LLM_MAX_RETRIES` and falls back to a determ
 
 - `GET /api/health`
 - `GET /api/providers`
+- `GET /api/capabilities`
+- `GET /api/admin/summary`
+- `GET /api/admin/events`
 - `POST /api/chat`
 - `POST /api/foundry/brief`
 - `POST /api/tarot-image`
@@ -68,10 +71,15 @@ The smoke pass verifies:
 - the root foundry app
 - the tarot app
 - the ops app
+- the orbital app
 - relay health and provider discovery
+- relay capability and admin surfaces
 - chat fallback
 - foundry brief compilation
 - tarot image generation or explicit local fallback
+- relay variation scenarios with and without configured providers
+
+Detailed live-surface and deployment behavior is documented in [`docs/LIVE_APPS.md`](./docs/LIVE_APPS.md).
 
 ## GitHub Pages
 
@@ -117,3 +125,6 @@ node api/server.mjs
 - The backend serves static files too, so the VPS can host the whole app directly.
 - GitHub Pages is static-only; that is why the API base is configurable in the UI.
 - The foundry compiler currently emits a `PersonalBrief` JSON structure and can be expanded with persistent traces, editable hypotheses, and multi-agent build launch.
+- `/tarot/` now uses a concrete chain: relay -> Pollinations -> SVG fallback.
+- `/orbital/` now probes public GitHub state plus optional relay/foundry state.
+- `/ops/` now also shows relay/foundry summary when an API base is configured.

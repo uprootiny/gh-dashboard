@@ -11,6 +11,8 @@ const ROOT = path.resolve(__dirname, "..");
 const PORT = Number(process.env.PORT || 8787);
 const TIMEOUT_MS = Number(process.env.LLM_TIMEOUT_MS || 30000);
 const MAX_RETRIES = Number(process.env.LLM_MAX_RETRIES || 2);
+const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 60000);
+const RATE_LIMIT_MAX_REQUESTS = Number(process.env.RATE_LIMIT_MAX_REQUESTS || 120);
 const PROVIDER_ORDER = (process.env.LLM_PROVIDER_ORDER || "openai,anthropic,openrouter,ollama")
   .split(",")
   .map((item) => item.trim())
@@ -19,6 +21,15 @@ const ALLOW_ORIGINS = (process.env.CORS_ALLOW_ORIGINS || "*")
   .split(",")
   .map((item) => item.trim())
   .filter(Boolean);
+const requestBuckets = new Map();
+const adminEvents = [];
+const adminStats = {
+  totalRequests: 0,
+  apiRequests: 0,
+  recentErrors: 0,
+  statusCounts: {},
+  routeCounts: {}
+};
 
 const MIME_TYPES = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -34,35 +45,64 @@ const MIME_TYPES = new Map([
 ]);
 
 createServer(async (req, res) => {
+  const requestStart = Date.now();
+  const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+  const requestMeta = {
+    route: url.pathname,
+    method: req.method || "GET"
+  };
   try {
     setCorsHeaders(req, res);
 
     if (req.method === "OPTIONS") {
       res.writeHead(204);
       res.end();
+      recordAdminEvent({ ...requestMeta, status: 204, durationMs: Date.now() - requestStart });
       return;
     }
 
-    const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+    if (!checkRateLimit(req, url.pathname)) {
+      writeJson(res, 429, { error: "rate limit exceeded" });
+      recordAdminEvent({ ...requestMeta, status: 429, durationMs: Date.now() - requestStart, error: "rate limit exceeded" });
+      return;
+    }
 
     if (req.method === "GET" && url.pathname === "/api/health") {
-      return writeJson(res, 200, {
+      writeJson(res, 200, {
         ok: true,
         service: "hynous-foundry",
         providerOrder: PROVIDER_ORDER,
         timestamp: new Date().toISOString()
       });
+      recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart });
+      return;
     }
 
     if (req.method === "GET" && url.pathname === "/api/providers") {
-      return writeJson(res, 200, {
+      writeJson(res, 200, {
         providerOrder: PROVIDER_ORDER,
         providers: listConfiguredProviders()
       });
+      recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart });
+      return;
     }
 
     if (req.method === "GET" && url.pathname === "/api/capabilities") {
-      return writeJson(res, 200, await buildCapabilitiesPayload());
+      writeJson(res, 200, await buildCapabilitiesPayload());
+      recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/admin/summary") {
+      writeJson(res, 200, buildAdminSummary());
+      recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/admin/events") {
+      writeJson(res, 200, { events: adminEvents.slice(-50).reverse() });
+      recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart });
+      return;
     }
 
     if (req.method === "POST" && url.pathname === "/api/chat") {
@@ -84,7 +124,9 @@ createServer(async (req, res) => {
         })
       });
 
-      return writeJson(res, 200, result);
+      writeJson(res, 200, result);
+      recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart, provider: result.provider });
+      return;
     }
 
     if (req.method === "POST" && url.pathname === "/api/foundry/brief") {
@@ -103,7 +145,18 @@ createServer(async (req, res) => {
         })
       });
 
-      return writeJson(res, 200, result);
+      // Persist the compiled brief so CLI and web share the same artifact
+      if (result.brief) {
+        const persistBody = { ...result.brief, source: "web", provider: result.provider };
+        handleFoundryRoute(
+          { method: "POST" }, { pathname: "/api/foundry/compiled-brief" },
+          () => {}, () => Promise.resolve(persistBody)
+        ).catch(() => {});
+      }
+
+      writeJson(res, 200, result);
+      recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart, provider: result.provider });
+      return;
     }
 
     if (req.method === "POST" && url.pathname === "/api/tarot-image") {
@@ -114,15 +167,19 @@ createServer(async (req, res) => {
 
       try {
         const image = await generateTarotImage(prompt);
-        return writeJson(res, 200, image);
+        writeJson(res, 200, image);
+        recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart, provider: image.provider });
+        return;
       } catch (error) {
-        return writeJson(res, 200, {
+        writeJson(res, 200, {
           provider: "svg-fallback",
           model: "local-svg",
           prompt,
           imageDataUrl: svgTarotFallback(card, motif),
           warnings: [error.message || "Remote image generation failed; returned SVG fallback."]
         });
+        recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart, provider: "svg-fallback", error: error.message || "image generation failed" });
+        return;
       }
     }
 
@@ -133,16 +190,23 @@ createServer(async (req, res) => {
         (status, payload) => writeJson(res, status, payload),
         readJsonBody
       );
-      if (handled !== false) return;
+      if (handled !== false) {
+        recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart });
+        return;
+      }
     }
 
     if (req.method === "GET" || req.method === "HEAD") {
-      return serveStatic(url.pathname, res, req.method === "HEAD");
+      await serveStatic(url.pathname, res, req.method === "HEAD");
+      recordAdminEvent({ ...requestMeta, status: 200, durationMs: Date.now() - requestStart });
+      return;
     }
 
     writeJson(res, 404, { error: "Not found" });
+    recordAdminEvent({ ...requestMeta, status: 404, durationMs: Date.now() - requestStart, error: "not found" });
   } catch (error) {
     writeJson(res, 500, { error: error.message || "Internal server error" });
+    recordAdminEvent({ ...requestMeta, status: 500, durationMs: Date.now() - requestStart, error: error.message || "internal server error" });
   }
 }).listen(PORT, () => {
   console.log(`hynous-foundry listening on http://0.0.0.0:${PORT}`);
@@ -159,6 +223,21 @@ function setCorsHeaders(req, res) {
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+}
+
+function checkRateLimit(req, routePath) {
+  if (!routePath.startsWith("/api/")) return true;
+  const ip = req.socket.remoteAddress || "unknown";
+  const key = `${ip}:${req.method || "GET"}:${routePath}`;
+  const now = Date.now();
+  const bucket = requestBuckets.get(key) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+  if (now > bucket.resetAt) {
+    bucket.count = 0;
+    bucket.resetAt = now + RATE_LIMIT_WINDOW_MS;
+  }
+  bucket.count += 1;
+  requestBuckets.set(key, bucket);
+  return bucket.count <= RATE_LIMIT_MAX_REQUESTS;
 }
 
 async function serveStatic(requestPath, res, headOnly = false) {
@@ -194,6 +273,35 @@ async function readJsonBody(req) {
 function writeJson(res, status, payload) {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(payload, null, 2));
+}
+
+function recordAdminEvent(event) {
+  adminStats.totalRequests += 1;
+  if (event.route.startsWith("/api/")) adminStats.apiRequests += 1;
+  adminStats.statusCounts[event.status] = (adminStats.statusCounts[event.status] || 0) + 1;
+  adminStats.routeCounts[event.route] = (adminStats.routeCounts[event.route] || 0) + 1;
+
+  adminEvents.push({
+    at: new Date().toISOString(),
+    ...event
+  });
+  while (adminEvents.length > 200) adminEvents.shift();
+
+  adminStats.recentErrors = adminEvents.filter((item) => item.status >= 400 || item.error).length;
+}
+
+function buildAdminSummary() {
+  return {
+    ...adminStats,
+    rateLimit: {
+      windowMs: RATE_LIMIT_WINDOW_MS,
+      maxRequests: RATE_LIMIT_MAX_REQUESTS
+    },
+    recentRoutes: Object.entries(adminStats.routeCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([route, count]) => ({ route, count }))
+  };
 }
 
 function listConfiguredProviders() {

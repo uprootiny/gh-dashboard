@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node api/server.mjs",
     "dev": "node --watch api/server.mjs",
-    "check": "node --check api/server.mjs && node --check src/dashboard.js && node --check tarot/app.js && node --check ops/app.js && node --check orbital/app.js",
-    "test": "python3 -m unittest tests/test_foundry.py && node tests/web_smoke.mjs",
+    "check": "node --check api/server.mjs && node --check src/runtime.js && node --check src/dashboard.js && node --check tarot/app.js && node --check ops/app.js && node --check orbital/app.js",
+    "test": "python3 -m unittest tests/test_foundry.py && node tests/web_smoke.mjs && node tests/relay_variations.mjs",
     "smoke": "node tests/web_smoke.mjs"
   },
   "engines": {

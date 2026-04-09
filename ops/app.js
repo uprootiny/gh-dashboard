@@ -1,18 +1,23 @@
 const API = "https://api.github.com";
 const USER = "uprootiny";
-const tokenKey = "gh_token";
+const tokenKey = window.HynousRuntime.GITHUB_TOKEN_KEY;
 
 const tokenInput = document.getElementById("token");
+const apiBaseInput = document.getElementById("api-base");
 const statusEl = document.getElementById("status");
 const updatedEl = document.getElementById("updated");
 const dashboardEl = document.getElementById("dashboard");
+const relayStatusEl = document.getElementById("relay-status");
+const relayEventsEl = document.getElementById("relay-events");
 
-let token = localStorage.getItem(tokenKey) || "";
+let token = window.HynousRuntime.getGithubToken();
+apiBaseInput.value = window.HynousRuntime.getApiBase();
 if (token) {
   tokenInput.value = token;
   statusEl.textContent = "Token loaded from local storage.";
   refresh();
 }
+refreshRelay();
 
 document.getElementById("connect").addEventListener("click", () => {
   token = tokenInput.value.trim();
@@ -20,12 +25,20 @@ document.getElementById("connect").addEventListener("click", () => {
     statusEl.textContent = "Token required.";
     return;
   }
-  localStorage.setItem(tokenKey, token);
+  window.HynousRuntime.setGithubToken(token);
   statusEl.textContent = "Token stored locally. Loading telemetry…";
   refresh();
 });
 
 document.getElementById("refresh").addEventListener("click", refresh);
+document.getElementById("refresh-relay").addEventListener("click", refreshRelay);
+apiBaseInput.addEventListener("change", persistApiBase);
+apiBaseInput.addEventListener("blur", persistApiBase);
+
+function persistApiBase() {
+  apiBaseInput.value = window.HynousRuntime.setApiBase(apiBaseInput.value);
+  refreshRelay();
+}
 
 async function gh(path) {
   const res = await fetch(`${API}${path}`, {
@@ -76,6 +89,35 @@ async function refresh() {
   } catch (error) {
     dashboardEl.innerHTML = `<article class="card"><h2>Error</h2><div class="status">${escapeHtml(error.message)}</div></article>`;
     statusEl.textContent = "Failed to load telemetry.";
+  }
+}
+
+async function refreshRelay() {
+  try {
+    const probe = await window.HynousRuntime.probeRelay();
+    if (!probe.configured) {
+      relayStatusEl.textContent = "No relay configured. This app can still read GitHub directly.";
+      relayEventsEl.innerHTML = "<li>Set an API base to expose relay and foundry state.</li>";
+      return;
+    }
+
+    const capabilities = probe.capabilities || {};
+    const adminSummary = await window.HynousRuntime.apiJson("/api/admin/summary", { method: "GET" }).catch(() => null);
+    relayStatusEl.textContent = probe.healthy
+      ? `Relay healthy. LLM providers: ${capabilities.llm?.configuredCount || 0}. Image relay: ${capabilities.images?.relay?.configured ? "on" : "off"}.`
+      : "Relay configured but unhealthy.";
+
+    const lines = [
+      `foundry stage: ${capabilities.foundry?.currentStage || "unknown"}`,
+      `foundry trace count: ${capabilities.foundry?.traceCount ?? "n/a"}`,
+      adminSummary ? `tracked requests: ${adminSummary.totalRequests}` : "admin summary unavailable",
+      adminSummary ? `recent errors: ${adminSummary.recentErrors}` : "error summary unavailable"
+    ];
+
+    relayEventsEl.innerHTML = lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+  } catch (error) {
+    relayStatusEl.textContent = `Relay refresh failed: ${error.message}`;
+    relayEventsEl.innerHTML = `<li>${escapeHtml(error.message)}</li>`;
   }
 }
 

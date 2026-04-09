@@ -108,6 +108,12 @@ for (const scenario of scenarios) {
     assert.equal(Array.isArray(capabilities.images.browserFallbacks), true);
     assert.equal(Boolean(capabilities.images.relay.configured), false);
 
+    const adminSummary = await fetchJson(base, "/api/admin/summary");
+    assert.equal(typeof adminSummary.totalRequests, "number");
+
+    const adminEvents = await fetchJson(base, "/api/admin/events");
+    assert.equal(Array.isArray(adminEvents.events), true);
+
     const trace = await fetchJson(base, "/api/foundry/trace");
     assert.equal(typeof trace.count, "number");
     assert.ok(Array.isArray(trace.events));

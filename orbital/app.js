@@ -1,7 +1,6 @@
 const TAU = Math.PI * 2;
 const REPO_API = "https://api.github.com/repos/uprootiny/gh-dashboard";
 const RATE_API = "https://api.github.com/rate_limit";
-const RELAY_KEY = "hynous_api_base";
 const MODE_LEGEND = {
   instrument: "Crisp control, stronger response, visible coupling.",
   reverie: "Soft drift, layered residue, slower semantic thickening.",
@@ -80,7 +79,7 @@ timeScaleInput.addEventListener("input", () => {
   renderUi();
 });
 probeBtn.addEventListener("click", refreshDiagnostics);
-apiBaseInput.value = localStorage.getItem(RELAY_KEY) || "";
+apiBaseInput.value = window.HynousRuntime.getApiBase();
 apiBaseInput.addEventListener("change", persistBase);
 apiBaseInput.addEventListener("blur", persistBase);
 
@@ -126,9 +125,7 @@ function modeFromStats() {
 }
 
 function persistBase() {
-  const value = apiBaseInput.value.trim().replace(/\/$/, "");
-  if (value) localStorage.setItem(RELAY_KEY, value);
-  else localStorage.removeItem(RELAY_KEY);
+  apiBaseInput.value = window.HynousRuntime.setApiBase(apiBaseInput.value);
   refreshDiagnostics();
 }
 
@@ -409,25 +406,20 @@ async function probeRateLimit() {
 }
 
 async function probeRelay(base) {
-  const [healthRes, capabilitiesRes, traceRes, recoveryRes] = await Promise.all([
-    fetch(`${base}/api/health`),
-    fetch(`${base}/api/capabilities`),
-    fetch(`${base}/api/foundry/trace`),
-    fetch(`${base}/api/foundry/recovery`)
+  const [probe, trace, recovery] = await Promise.all([
+    window.HynousRuntime.probeRelay(),
+    window.HynousRuntime.apiJson("/api/foundry/trace", { method: "GET" }),
+    window.HynousRuntime.apiJson("/api/foundry/recovery", { method: "GET" })
   ]);
-  if (!healthRes.ok) throw new Error(`health ${healthRes.status}`);
-  const health = await healthRes.json();
-  const capabilities = capabilitiesRes.ok ? await capabilitiesRes.json() : { llm: { providers: [] }, images: { relay: { configured: false } } };
-  const trace = traceRes.ok ? await traceRes.json() : { count: null };
-  const recovery = recoveryRes.ok ? await recoveryRes.json() : { needsRecovery: false };
+  const capabilities = probe.capabilities || { llm: { providers: [] }, images: { relay: { configured: false } } };
   const configuredProviders = (capabilities.llm?.providers || []).filter((provider) => provider.configured).length;
   const imageConfigured = Boolean(capabilities.images?.relay?.configured);
   return {
-    healthy: Boolean(health.ok),
+    healthy: Boolean(probe.healthy),
     configuredProviders,
     traceCount: typeof trace.count === "number" ? trace.count : null,
     recoveryNeeded: Boolean(recovery.needsRecovery),
-    summary: `healthy=${Boolean(health.ok)} llm=${configuredProviders} imageRelay=${imageConfigured} trace=${trace.count ?? "n/a"} recovery=${Boolean(recovery.needsRecovery)}`
+    summary: `healthy=${Boolean(probe.healthy)} llm=${configuredProviders} imageRelay=${imageConfigured} trace=${trace.count ?? "n/a"} recovery=${Boolean(recovery.needsRecovery)}`
   };
 }
 

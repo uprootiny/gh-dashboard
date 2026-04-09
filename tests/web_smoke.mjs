@@ -82,6 +82,13 @@ try {
   assert.ok(Array.isArray(capabilities.llm?.providers));
   assert.ok(Array.isArray(capabilities.images?.browserFallbacks));
 
+  const adminSummary = await fetchJson("/api/admin/summary");
+  assert.equal(typeof adminSummary.totalRequests, "number");
+  assert.equal(typeof adminSummary.rateLimit?.windowMs, "number");
+
+  const adminEvents = await fetchJson("/api/admin/events");
+  assert.ok(Array.isArray(adminEvents.events));
+
   const chat = await fetchJson("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
