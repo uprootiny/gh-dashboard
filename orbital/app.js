@@ -1,4 +1,7 @@
 const TAU = Math.PI * 2;
+const REPO_API = "https://api.github.com/repos/uprootiny/gh-dashboard";
+const RATE_API = "https://api.github.com/rate_limit";
+const RELAY_KEY = "hynous_api_base";
 const MODE_LEGEND = {
   instrument: "Crisp control, stronger response, visible coupling.",
   reverie: "Soft drift, layered residue, slower semantic thickening.",
@@ -15,8 +18,12 @@ const modeTitle = document.getElementById("mode-title");
 const modeDescription = document.getElementById("mode-description");
 const resetBtn = document.getElementById("reset-btn");
 const traceToggle = document.getElementById("trace-toggle");
+const probeBtn = document.getElementById("probe-btn");
+const apiBaseInput = document.getElementById("api-base");
 const timeScaleInput = document.getElementById("time-scale");
 const timeScaleValue = document.getElementById("time-scale-value");
+const diagList = document.getElementById("diag-list");
+const traceList = document.getElementById("trace-list");
 
 let size = { w: 900, h: 640 };
 let rings = seedRings(6);
@@ -31,6 +38,15 @@ let pointer = { x: 0, y: 0, inside: false };
 let last = performance.now();
 let lastMove = performance.now();
 let raf = 0;
+let diagnostics = {
+  repoFreshnessHours: null,
+  githubRateRemaining: null,
+  relayHealthy: false,
+  configuredProviders: 0,
+  traceCount: null,
+  recoveryNeeded: false
+};
+let systemEvents = [];
 
 const ro = new ResizeObserver(([entry]) => {
   const rect = entry.contentRect;
@@ -63,9 +79,15 @@ timeScaleInput.addEventListener("input", () => {
   timeScale = Number(timeScaleInput.value);
   renderUi();
 });
+probeBtn.addEventListener("click", refreshDiagnostics);
+apiBaseInput.value = localStorage.getItem(RELAY_KEY) || "";
+apiBaseInput.addEventListener("change", persistBase);
+apiBaseInput.addEventListener("blur", persistBase);
 
 renderUi();
+renderDiagnostics();
 raf = requestAnimationFrame(step);
+refreshDiagnostics();
 
 function clamp(x, a, b) {
   return Math.max(a, Math.min(b, x));
@@ -101,6 +123,13 @@ function modeFromStats() {
   if (stats.hovers > 120 && stats.clicks < 8) return "oracle";
   if (stats.drags > 24 || stats.clicks > 16) return "instrument";
   return "reverie";
+}
+
+function persistBase() {
+  const value = apiBaseInput.value.trim().replace(/\/$/, "");
+  if (value) localStorage.setItem(RELAY_KEY, value);
+  else localStorage.removeItem(RELAY_KEY);
+  refreshDiagnostics();
 }
 
 function center() {
@@ -173,8 +202,21 @@ function step(now) {
     const neglect = clamp(ring.neglect + (index === hovered || index === selected ? -0.006 : 0.0018), 0, 1);
     const consecration = clamp(ring.consecration + (dragging && index === selected ? 0.005 : -0.0015), 0, 1);
     const fatigue = clamp(ring.fatigue + (index === selected && dragging ? 0.006 : -0.0028), 0, 1);
-    const brightness = clamp(0.28 + consecration * 0.35 + (1 - neglect) * 0.24 - fatigue * 0.18 + ring.resonance * 0.15, 0.18, 0.95);
-    const memory = clamp(ring.memory + consecration * 0.004 - 0.0012 + (traceOn ? 0.0005 : -0.001), 0.1, 1);
+    const diagnosticBoost = index === 0 && diagnostics.githubRateRemaining != null
+      ? diagnostics.githubRateRemaining * 0.12
+      : index === 1 && diagnostics.repoFreshnessHours != null
+        ? clamp(1 - diagnostics.repoFreshnessHours / 72, 0, 1) * 0.1
+        : index === 2 && diagnostics.relayHealthy
+          ? 0.12
+          : index === 3 && diagnostics.configuredProviders
+            ? clamp(diagnostics.configuredProviders / 4, 0, 1) * 0.1
+            : index === 4 && diagnostics.traceCount != null
+              ? clamp(diagnostics.traceCount / 30, 0, 1) * 0.1
+              : index === 5 && diagnostics.recoveryNeeded
+                ? -0.08
+                : 0;
+    const brightness = clamp(0.28 + consecration * 0.35 + (1 - neglect) * 0.24 - fatigue * 0.18 + ring.resonance * 0.15 + diagnosticBoost, 0.18, 0.95);
+    const memory = clamp(ring.memory + consecration * 0.004 - 0.0012 + (traceOn ? 0.0005 : -0.001) + diagnosticBoost * 0.3, 0.1, 1);
     return { ...ring, theta: theta % TAU, neglect, consecration, fatigue, brightness, memory };
   });
 
@@ -228,6 +270,7 @@ function renderUi() {
       </div>
     `)
     .join("");
+  renderTrace();
 }
 
 function renderScene(now) {
@@ -282,4 +325,151 @@ function resetAll() {
   stats = { hovers: 0, drags: 0, clicks: 0, stillness: 0 };
   traces = [];
   renderUi();
+}
+
+async function refreshDiagnostics() {
+  const base = apiBaseInput.value.trim().replace(/\/$/, "");
+  systemEvents.unshift(eventLine("diagnostic-refresh", "started probe cycle"));
+  systemEvents = systemEvents.slice(0, 10);
+  renderTrace();
+
+  const probes = await Promise.allSettled([
+    probeRepo(),
+    probeRateLimit(),
+    base ? probeRelay(base) : Promise.resolve({ skipped: true })
+  ]);
+
+  const [repo, rate, relay] = probes;
+
+  if (repo.status === "fulfilled") {
+    diagnostics.repoFreshnessHours = repo.value.freshnessHours;
+    systemEvents.unshift(eventLine("repo", `latest push ${repo.value.pushedAt}`));
+  } else {
+    systemEvents.unshift(eventLine("repo", `failed: ${repo.reason.message}`));
+  }
+
+  if (rate.status === "fulfilled") {
+    diagnostics.githubRateRemaining = rate.value.remainingRatio;
+    systemEvents.unshift(eventLine("github-rate", `${rate.value.remaining}/${rate.value.limit} remaining`));
+  } else {
+    systemEvents.unshift(eventLine("github-rate", `failed: ${rate.reason.message}`));
+  }
+
+  if (relay.status === "fulfilled" && !relay.value.skipped) {
+    diagnostics.relayHealthy = relay.value.healthy;
+    diagnostics.configuredProviders = relay.value.configuredProviders;
+    diagnostics.traceCount = relay.value.traceCount;
+    diagnostics.recoveryNeeded = relay.value.recoveryNeeded;
+    systemEvents.unshift(eventLine("relay", relay.value.summary));
+  } else if (base && relay.status === "rejected") {
+    diagnostics.relayHealthy = false;
+    diagnostics.configuredProviders = 0;
+    diagnostics.traceCount = null;
+    diagnostics.recoveryNeeded = false;
+    systemEvents.unshift(eventLine("relay", `failed: ${relay.reason.message}`));
+  } else {
+    diagnostics.relayHealthy = false;
+    diagnostics.configuredProviders = 0;
+    diagnostics.traceCount = null;
+    diagnostics.recoveryNeeded = false;
+    systemEvents.unshift(eventLine("relay", "not configured"));
+  }
+
+  systemEvents = systemEvents.slice(0, 10);
+  renderDiagnostics();
+  renderTrace();
+}
+
+async function probeRepo() {
+  const started = performance.now();
+  const response = await fetch(REPO_API, { headers: { Accept: "application/vnd.github+json" } });
+  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  const data = await response.json();
+  const pushedAt = data.pushed_at;
+  const freshnessHours = pushedAt ? (Date.now() - Date.parse(pushedAt)) / 36e5 : null;
+  return {
+    pushedAt: pushedAt ? new Date(pushedAt).toLocaleString() : "unknown",
+    freshnessHours,
+    latencyMs: Math.round(performance.now() - started),
+    stars: data.stargazers_count
+  };
+}
+
+async function probeRateLimit() {
+  const response = await fetch(RATE_API, { headers: { Accept: "application/vnd.github+json" } });
+  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  const data = await response.json();
+  const core = data.resources?.core;
+  if (!core) throw new Error("missing core rate limit");
+  return {
+    remaining: core.remaining,
+    limit: core.limit,
+    remainingRatio: core.limit ? core.remaining / core.limit : 0
+  };
+}
+
+async function probeRelay(base) {
+  const [healthRes, providersRes, traceRes, recoveryRes] = await Promise.all([
+    fetch(`${base}/api/health`),
+    fetch(`${base}/api/providers`),
+    fetch(`${base}/api/foundry/trace`),
+    fetch(`${base}/api/foundry/recovery`)
+  ]);
+  if (!healthRes.ok) throw new Error(`health ${healthRes.status}`);
+  const health = await healthRes.json();
+  const providers = providersRes.ok ? await providersRes.json() : { providers: [] };
+  const trace = traceRes.ok ? await traceRes.json() : { count: null };
+  const recovery = recoveryRes.ok ? await recoveryRes.json() : { needsRecovery: false };
+  const configuredProviders = (providers.providers || []).filter((provider) => provider.configured).length;
+  return {
+    healthy: Boolean(health.ok),
+    configuredProviders,
+    traceCount: typeof trace.count === "number" ? trace.count : null,
+    recoveryNeeded: Boolean(recovery.needsRecovery),
+    summary: `healthy=${Boolean(health.ok)} configuredProviders=${configuredProviders} trace=${trace.count ?? "n/a"} recovery=${Boolean(recovery.needsRecovery)}`
+  };
+}
+
+function renderDiagnostics() {
+  const lines = [
+    diagnostics.githubRateRemaining == null
+      ? "GitHub rate probe unavailable."
+      : `GitHub core rate remaining: ${Math.round(diagnostics.githubRateRemaining * 100)}%.`,
+    diagnostics.repoFreshnessHours == null
+      ? "Repo freshness unknown."
+      : `Latest public repo push age: ${diagnostics.repoFreshnessHours.toFixed(1)} hours.`,
+    apiBaseInput.value.trim()
+      ? `Relay configured. Healthy: ${diagnostics.relayHealthy ? "yes" : "no"}.`
+      : "Relay not configured; running on public GitHub diagnostics only.",
+    diagnostics.configuredProviders
+      ? `Relay reports ${diagnostics.configuredProviders} configured provider(s).`
+      : "No configured relay providers detected.",
+    diagnostics.traceCount == null
+      ? "Foundry trace count unavailable."
+      : `Foundry trace events available: ${diagnostics.traceCount}.`,
+    diagnostics.recoveryNeeded
+      ? "Recovery is needed on the foundry ledger."
+      : "No recovery flag is currently raised."
+  ];
+
+  diagList.innerHTML = lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+}
+
+function renderTrace() {
+  traceList.innerHTML = systemEvents.length
+    ? systemEvents.map((event) => `<li>${escapeHtml(event)}</li>`).join("")
+    : "<li>Live trace events will appear here.</li>";
+}
+
+function eventLine(kind, message) {
+  return `[${new Date().toLocaleTimeString()}] ${kind}: ${message}`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

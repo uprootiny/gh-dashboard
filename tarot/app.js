@@ -1,24 +1,40 @@
 const POLLINATIONS = "https://image.pollinations.ai/prompt/";
 const RELAY_KEY = "hynous_api_base";
+const METER_KEY = "hynous_tarot_meter_v1";
 const apiBaseInput = document.getElementById("api-base");
 const cardSelect = document.getElementById("card");
 const motifInput = document.getElementById("motif");
 const generateBtn = document.getElementById("generate");
+const refreshDiagBtn = document.getElementById("refresh-diag");
 const imageEl = document.getElementById("image");
 const promptEl = document.getElementById("prompt");
 const statusEl = document.getElementById("status");
+const relayStatusEl = document.getElementById("relay-status");
+const pollinationsStatusEl = document.getElementById("pollinations-status");
+const lastProviderEl = document.getElementById("last-provider");
+const lastLatencyEl = document.getElementById("last-latency");
+const attemptCountEl = document.getElementById("attempt-count");
+const fallbackCountEl = document.getElementById("fallback-count");
+const meterSummaryEl = document.getElementById("meter-summary");
+const eventLogEl = document.getElementById("event-log");
+
+let meter = loadMeter();
 
 apiBaseInput.value = localStorage.getItem(RELAY_KEY) || "";
 seed();
+renderDiagnostics();
+probeDiagnostics();
 
 apiBaseInput.addEventListener("change", persistBase);
 apiBaseInput.addEventListener("blur", persistBase);
 generateBtn.addEventListener("click", generate);
+refreshDiagBtn.addEventListener("click", probeDiagnostics);
 
 function persistBase() {
   const value = apiBaseInput.value.trim().replace(/\/$/, "");
   if (value) localStorage.setItem(RELAY_KEY, value);
   else localStorage.removeItem(RELAY_KEY);
+  probeDiagnostics();
 }
 
 function buildPrompt(card, motif) {
@@ -38,6 +54,8 @@ async function generate() {
   promptEl.textContent = prompt;
 
   const base = (apiBaseInput.value.trim() || "").replace(/\/$/, "");
+  const startedAt = performance.now();
+  recordAttempt();
 
   // Strategy 1: Custom relay (if configured)
   if (base) {
@@ -51,10 +69,14 @@ async function generate() {
       const data = await res.json();
       if (res.ok && data.imageDataUrl) {
         imageEl.src = data.imageDataUrl;
-        statusEl.textContent = `Generated via ${data.provider || "relay"}.`;
+        const latency = Math.round(performance.now() - startedAt);
+        recordSuccess(data.provider || "relay", latency, data.warnings || []);
+        statusEl.textContent = `Generated via ${data.provider || "relay"} in ${latency} ms.`;
+        renderDiagnostics();
         return;
       }
     } catch (e) {
+      recordFailure("relay", e.message);
       statusEl.textContent = `Relay failed (${e.message}), falling back to Pollinations…`;
     }
   }
@@ -73,13 +95,20 @@ async function generate() {
       setTimeout(() => reject(new Error("timeout")), 45000);
       img.src = pollinationsUrl;
     });
+    void loaded;
     imageEl.src = pollinationsUrl;
-    statusEl.textContent = "Generated via Pollinations.ai (free, Stable Diffusion).";
+    const latency = Math.round(performance.now() - startedAt);
+    recordSuccess("pollinations", latency, base ? ["Relay failed first; used free fallback."] : []);
+    statusEl.textContent = `Generated via Pollinations.ai in ${latency} ms.`;
   } catch (e) {
     // Strategy 3: SVG fallback
     imageEl.src = fallbackSvg(card, motif);
-    statusEl.textContent = `All providers failed. SVG fallback rendered. (${e.message})`;
+    const latency = Math.round(performance.now() - startedAt);
+    recordSuccess("svg-fallback", latency, [`Remote generation failed: ${e.message}`]);
+    statusEl.textContent = `All remote providers failed. SVG fallback rendered in ${latency} ms.`;
   }
+
+  renderDiagnostics();
 }
 
 function fallbackSvg(card, motif) {
@@ -118,4 +147,132 @@ function escapeXml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
+}
+
+function loadMeter() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(METER_KEY) || "{}");
+    return {
+      attempts: Number(saved.attempts || 0),
+      fallbackEvents: Number(saved.fallbackEvents || 0),
+      providers: saved.providers || {},
+      lastProvider: saved.lastProvider || null,
+      lastLatencyMs: Number(saved.lastLatencyMs || 0),
+      events: Array.isArray(saved.events) ? saved.events.slice(0, 12) : []
+    };
+  } catch {
+    return {
+      attempts: 0,
+      fallbackEvents: 0,
+      providers: {},
+      lastProvider: null,
+      lastLatencyMs: 0,
+      events: []
+    };
+  }
+}
+
+function saveMeter() {
+  localStorage.setItem(METER_KEY, JSON.stringify(meter));
+}
+
+function recordAttempt() {
+  meter.attempts += 1;
+  saveMeter();
+}
+
+function recordFailure(provider, error) {
+  const entry = meter.providers[provider] || { attempts: 0, successes: 0, failures: 0 };
+  entry.attempts += 1;
+  entry.failures += 1;
+  meter.providers[provider] = entry;
+  meter.fallbackEvents += 1;
+  pushEvent(`${provider} failed: ${error}`);
+  saveMeter();
+}
+
+function recordSuccess(provider, latencyMs, warnings) {
+  const entry = meter.providers[provider] || { attempts: 0, successes: 0, failures: 0 };
+  entry.attempts += 1;
+  entry.successes += 1;
+  meter.providers[provider] = entry;
+  meter.lastProvider = provider;
+  meter.lastLatencyMs = latencyMs;
+  pushEvent(`${provider} succeeded in ${latencyMs} ms`);
+  for (const warning of warnings || []) {
+    meter.fallbackEvents += 1;
+    pushEvent(String(warning));
+  }
+  saveMeter();
+}
+
+function pushEvent(message) {
+  meter.events.unshift({
+    message,
+    at: new Date().toISOString()
+  });
+  meter.events = meter.events.slice(0, 8);
+}
+
+function renderDiagnostics() {
+  const base = (apiBaseInput.value.trim() || "").replace(/\/$/, "");
+  const relayText = base ? "Configured; probe pending or completed." : "No relay configured; browser will use free path.";
+  relayStatusEl.textContent = relayStatusEl.textContent === "Unknown" ? relayText : relayStatusEl.textContent;
+  lastProviderEl.textContent = meter.lastProvider || "None yet";
+  lastLatencyEl.textContent = meter.lastLatencyMs ? `${meter.lastLatencyMs} ms` : "No runs yet";
+  attemptCountEl.textContent = String(meter.attempts);
+  fallbackCountEl.textContent = String(meter.fallbackEvents);
+
+  const providerBits = Object.entries(meter.providers)
+    .map(([name, stats]) => `${name}: ${stats.successes}/${stats.attempts} success`)
+    .join(" · ");
+  meterSummaryEl.textContent = providerBits || "No provider calls recorded yet.";
+
+  eventLogEl.innerHTML = meter.events.length
+    ? meter.events.map((event) => `<li>${escapeHtml(event.message)} <small>(${new Date(event.at).toLocaleTimeString()})</small></li>`).join("")
+    : "<li>Diagnostics will appear here after the first probe.</li>";
+}
+
+async function probeDiagnostics() {
+  const base = (apiBaseInput.value.trim() || "").replace(/\/$/, "");
+  relayStatusEl.textContent = base ? "Checking relay…" : "No relay configured; skipped.";
+  pollinationsStatusEl.textContent = "Free provider available at runtime; next generate will verify it.";
+
+  if (!base) {
+    renderDiagnostics();
+    return;
+  }
+
+  try {
+    const [healthRes, providersRes] = await Promise.all([
+      fetch(`${base}/api/health`),
+      fetch(`${base}/api/providers`)
+    ]);
+
+    const health = await healthRes.json();
+    const providers = await providersRes.json();
+    const configured = (providers.providers || [])
+      .filter((provider) => provider.configured)
+      .map((provider) => `${provider.id}:${provider.model || "configured"}`);
+
+    relayStatusEl.textContent = health.ok
+      ? `Reachable. Service ${health.service} responded; configured providers: ${configured.join(", ") || "none"}`
+      : "Relay responded without healthy status.";
+    pushEvent(`relay probe ok: ${configured.length} configured provider(s)`);
+  } catch (error) {
+    relayStatusEl.textContent = `Relay probe failed: ${error.message}`;
+    pushEvent(`relay probe failed: ${error.message}`);
+  }
+
+  saveMeter();
+  renderDiagnostics();
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

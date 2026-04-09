@@ -59,6 +59,8 @@ try {
 
   const tarotHtml = await fetchText("/tarot/");
   assert.match(tarotHtml, /Tarot/i);
+  assert.match(tarotHtml, /Metering ledger/);
+  assert.match(tarotHtml, /Refresh diagnostics/);
 
   const opsHtml = await fetchText("/ops/");
   assert.match(opsHtml, /GitHub/i);
@@ -66,6 +68,8 @@ try {
   const orbitalHtml = await fetchText("/orbital/");
   assert.match(orbitalHtml, /Orbital Foundry Demo/);
   assert.match(orbitalHtml, /Temperament of selected orbit/);
+  assert.match(orbitalHtml, /Reality probes/);
+  assert.match(orbitalHtml, /Trace bus/);
 
   const health = await fetchJson("/api/health");
   assert.equal(health.ok, true);

@@ -86,9 +86,48 @@
       line-height: 1.55;
     }
     .status { color: var(--cedar); line-height: 1.7; }
+    .diagnostics {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .diag-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .diag-card {
+      border-radius: 18px;
+      border: 1px solid rgba(75,46,42,.12);
+      background: rgba(255,255,255,.62);
+      padding: 14px;
+    }
+    .diag-card strong {
+      display: block;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--forest);
+      margin-bottom: 8px;
+    }
+    .diag-card span {
+      display: block;
+      color: var(--cedar);
+      line-height: 1.5;
+    }
+    .history {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--cedar);
+      line-height: 1.55;
+    }
+    .history li + li {
+      margin-top: 8px;
+    }
     @media (max-width: 920px) {
       .grid { grid-template-columns: 1fr; }
       .nav { grid-template-columns: 1fr; }
+      .diag-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -97,7 +136,7 @@
     <div class="nav">
       <div>
         <h1>Ἑυνοῦς Tarot Forge</h1>
-        <p class="status">A focused webapp for arcana image generation over a configured API base.</p>
+        <p class="status">A focused webapp for arcana image generation with a real provider chain: relay when available, Pollinations when not, SVG only as last fallback.</p>
       </div>
       <div class="links">
         <a href="../">Foundry</a>
@@ -128,9 +167,53 @@
           <textarea id="motif">ember-lit woodcut tarot, bark and ash palette, sacred geometry, serious symbolic composition, no text</textarea>
         </div>
         <div class="field">
-          <button class="cta" id="generate">Generate Tarot Image</button>
+          <div class="links">
+            <button class="cta" id="generate">Generate Tarot Image</button>
+            <button id="refresh-diag" type="button">Refresh diagnostics</button>
+          </div>
         </div>
-        <p class="status" id="status">Ready. If the relay is unavailable, a local SVG fallback is rendered.</p>
+        <p class="status" id="status">Ready. The app will meter relay, Pollinations, and SVG fallback usage.</p>
+
+        <div class="diagnostics">
+          <div class="diag-grid" id="diag-grid">
+            <div class="diag-card">
+              <strong>Relay status</strong>
+              <span id="relay-status">Unknown</span>
+            </div>
+            <div class="diag-card">
+              <strong>Free image path</strong>
+              <span id="pollinations-status">Not probed yet</span>
+            </div>
+            <div class="diag-card">
+              <strong>Last provider</strong>
+              <span id="last-provider">None yet</span>
+            </div>
+            <div class="diag-card">
+              <strong>Last latency</strong>
+              <span id="last-latency">No runs yet</span>
+            </div>
+            <div class="diag-card">
+              <strong>Total attempts</strong>
+              <span id="attempt-count">0</span>
+            </div>
+            <div class="diag-card">
+              <strong>Fallback events</strong>
+              <span id="fallback-count">0</span>
+            </div>
+          </div>
+
+          <div class="diag-card">
+            <strong>Metering ledger</strong>
+            <div class="status" id="meter-summary">No generations yet.</div>
+          </div>
+
+          <div class="diag-card">
+            <strong>Recent provider events</strong>
+            <ol class="history" id="event-log">
+              <li>Diagnostics will appear here after the first probe.</li>
+            </ol>
+          </div>
+        </div>
       </section>
 
       <section class="panel">

@@ -204,6 +204,35 @@
     .mapping strong {
       color: var(--text);
     }
+    .diag-list, .trace-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .diag-list li + li, .trace-list li + li {
+      margin-top: 8px;
+    }
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .field label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .field input {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+    }
     @media (max-width: 1180px) {
       .layout {
         grid-template-columns: 1fr;
@@ -243,6 +272,10 @@
             <a href="../tarot/">Tarot</a>
             <a href="../ops/">Ops</a>
           </div>
+          <div class="field">
+            <label for="api-base">Relay / API base</label>
+            <input id="api-base" placeholder="https://your-vps.example.com">
+          </div>
           <h2>Temperament of selected orbit</h2>
           <div class="metric-grid" id="orbit-metrics"></div>
           <div class="range">
@@ -252,6 +285,7 @@
           </div>
           <div class="links" style="margin-top: 12px;">
             <button class="btn btn--solid" id="trace-toggle" type="button">Traces on</button>
+            <button class="btn" id="probe-btn" type="button">Refresh probes</button>
           </div>
         </section>
 
@@ -272,6 +306,20 @@
           <p><strong>Neglect</strong> -> ignored systems subtly change future response.</p>
           <p><strong>Fatigue</strong> -> overcontrol dampens responsiveness.</p>
           <p><strong>Mode inference</strong> -> frontstage play alters the backstage contract.</p>
+        </section>
+
+        <section class="panel card">
+          <h2>Reality probes</h2>
+          <ol class="diag-list" id="diag-list">
+            <li>Diagnostics loading…</li>
+          </ol>
+        </section>
+
+        <section class="panel card">
+          <h2>Trace bus</h2>
+          <ol class="trace-list" id="trace-list">
+            <li>Live trace events will appear here.</li>
+          </ol>
         </section>
       </div>
     </div>
