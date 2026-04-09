@@ -12,6 +12,7 @@ const relayEventsEl = document.getElementById("relay-events");
 
 let token = window.HynousRuntime.getGithubToken();
 apiBaseInput.value = window.HynousRuntime.getApiBase();
+window.HynousRuntime.paintRuntimeBanner({ configured: Boolean(apiBaseInput.value.trim()), healthy: false, capabilities: null });
 if (token) {
   tokenInput.value = token;
   statusEl.textContent = "Token loaded from local storage.";
@@ -96,12 +97,14 @@ async function refreshRelay() {
   try {
     const probe = await window.HynousRuntime.probeRelay();
     if (!probe.configured) {
+      window.HynousRuntime.paintRuntimeBanner(probe);
       relayStatusEl.textContent = "No relay configured. This app can still read GitHub directly.";
       relayEventsEl.innerHTML = "<li>Set an API base to expose relay and foundry state.</li>";
       return;
     }
 
     const capabilities = probe.capabilities || {};
+    window.HynousRuntime.paintRuntimeBanner(probe);
     const adminSummary = await window.HynousRuntime.apiJson("/api/admin/summary", { method: "GET" }).catch(() => null);
     relayStatusEl.textContent = probe.healthy
       ? `Relay healthy. LLM providers: ${capabilities.llm?.configuredCount || 0}. Image relay: ${capabilities.images?.relay?.configured ? "on" : "off"}.`
@@ -116,6 +119,7 @@ async function refreshRelay() {
 
     relayEventsEl.innerHTML = lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
   } catch (error) {
+    window.HynousRuntime.paintRuntimeBanner({ configured: true, healthy: false, capabilities: null });
     relayStatusEl.textContent = `Relay refresh failed: ${error.message}`;
     relayEventsEl.innerHTML = `<li>${escapeHtml(error.message)}</li>`;
   }

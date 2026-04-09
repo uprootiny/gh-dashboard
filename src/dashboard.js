@@ -128,6 +128,7 @@ if (token) {
 if (apiBaseInput) {
   apiBaseInput.value = apiBase;
 }
+window.HynousRuntime.paintRuntimeBanner({ configured: Boolean(apiBase), healthy: false, capabilities: null });
 
 init();
 
@@ -360,6 +361,7 @@ async function refreshProviderStatus() {
 
   try {
     const info = await window.HynousRuntime.getCapabilities();
+    window.HynousRuntime.paintRuntimeBanner({ configured: true, healthy: true, capabilities: info });
     providerOrder.innerHTML = info.llm.providers
       .map((provider) => `<span class="pill">${escapeHtml(provider.id)}: ${provider.configured ? escapeHtml(provider.model || "configured") : "not configured"}</span>`)
       .join("");
@@ -370,6 +372,7 @@ async function refreshProviderStatus() {
     }
     compileStatus.textContent = `Compiler reachable. LLM order: ${info.providerOrder.join(" → ")}. Foundry stage: ${info.foundry?.currentStage || "unknown"}.`;
   } catch {
+    window.HynousRuntime.paintRuntimeBanner({ configured: Boolean(apiBase), healthy: false, capabilities: null });
     providerOrder.innerHTML = `<span class="pill">API unavailable</span>`;
     compileStatus.textContent = "Could not reach the VPS API. The foundry can still render locally, but LLM compilation is offline.";
   }

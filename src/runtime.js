@@ -58,6 +58,43 @@
     };
   }
 
+  function inferRuntimeMode(probe) {
+    if (!probe?.configured) {
+      return {
+        mode: "static-only",
+        label: "Static-only mode",
+        detail: "No relay configured. Browser fallbacks and public probes only."
+      };
+    }
+
+    const capabilities = probe.capabilities || {};
+    const llmCount = capabilities.llm?.configuredCount || 0;
+    const imageRelay = Boolean(capabilities.images?.relay?.configured);
+    if (probe.healthy && (llmCount > 0 || imageRelay)) {
+      return {
+        mode: "full-relay",
+        label: "Relay-connected mode",
+        detail: `Relay reachable. LLM providers: ${llmCount}. Image relay: ${imageRelay ? "on" : "off"}.`
+      };
+    }
+
+    return {
+      mode: "partial-relay",
+      label: "Partial relay mode",
+      detail: "Relay configured, but backend capabilities are limited or unavailable."
+    };
+  }
+
+  function paintRuntimeBanner(probe) {
+    const nodes = global.document.querySelectorAll("[data-runtime-banner]");
+    if (!nodes.length) return;
+    const summary = inferRuntimeMode(probe);
+    for (const node of nodes) {
+      node.textContent = `${summary.label}. ${summary.detail}`;
+      node.dataset.runtimeMode = summary.mode;
+    }
+  }
+
   function getGithubToken() {
     return global.localStorage.getItem(GITHUB_TOKEN_KEY) || "";
   }
@@ -79,6 +116,8 @@
     apiJson,
     getCapabilities,
     probeRelay,
+    inferRuntimeMode,
+    paintRuntimeBanner,
     getGithubToken,
     setGithubToken
   };

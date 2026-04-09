@@ -85,6 +85,7 @@ apiBaseInput.addEventListener("blur", persistBase);
 
 renderUi();
 renderDiagnostics();
+window.HynousRuntime.paintRuntimeBanner({ configured: Boolean(apiBaseInput.value.trim()), healthy: false, capabilities: null });
 raf = requestAnimationFrame(step);
 refreshDiagnostics();
 
@@ -353,18 +354,28 @@ async function refreshDiagnostics() {
   }
 
   if (relay.status === "fulfilled" && !relay.value.skipped) {
+    window.HynousRuntime.paintRuntimeBanner({
+      configured: true,
+      healthy: diagnostics.relayHealthy,
+      capabilities: {
+        llm: { configuredCount: diagnostics.configuredProviders },
+        images: { relay: { configured: relay.value.summary.includes("imageRelay=true") } }
+      }
+    });
     diagnostics.relayHealthy = relay.value.healthy;
     diagnostics.configuredProviders = relay.value.configuredProviders;
     diagnostics.traceCount = relay.value.traceCount;
     diagnostics.recoveryNeeded = relay.value.recoveryNeeded;
     systemEvents.unshift(eventLine("relay", relay.value.summary));
   } else if (base && relay.status === "rejected") {
+    window.HynousRuntime.paintRuntimeBanner({ configured: true, healthy: false, capabilities: null });
     diagnostics.relayHealthy = false;
     diagnostics.configuredProviders = 0;
     diagnostics.traceCount = null;
     diagnostics.recoveryNeeded = false;
     systemEvents.unshift(eventLine("relay", `failed: ${relay.reason.message}`));
   } else {
+    window.HynousRuntime.paintRuntimeBanner({ configured: false, healthy: false, capabilities: null });
     diagnostics.relayHealthy = false;
     diagnostics.configuredProviders = 0;
     diagnostics.traceCount = null;

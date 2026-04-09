@@ -22,6 +22,7 @@ let meter = loadMeter();
 apiBaseInput.value = window.HynousRuntime.getApiBase();
 seed();
 renderDiagnostics();
+window.HynousRuntime.paintRuntimeBanner({ configured: Boolean(apiBaseInput.value.trim()), healthy: false, capabilities: null });
 probeDiagnostics();
 
 apiBaseInput.addEventListener("change", persistBase);
@@ -236,12 +237,14 @@ async function probeDiagnostics() {
   pollinationsStatusEl.textContent = "Free provider available at runtime; next generate will verify it.";
 
   if (!base) {
+    window.HynousRuntime.paintRuntimeBanner({ configured: false, healthy: false, capabilities: null });
     renderDiagnostics();
     return;
   }
 
   try {
     const probe = await window.HynousRuntime.probeRelay();
+    window.HynousRuntime.paintRuntimeBanner(probe);
     const capabilities = probe.capabilities || { llm: { providers: [] }, images: { relay: { configured: false } } };
     const configured = (capabilities.llm?.providers || [])
       .filter((provider) => provider.configured)
@@ -256,6 +259,7 @@ async function probeDiagnostics() {
       : "Relay image backend not configured; browser will use Pollinations or SVG.";
     pushEvent(`relay probe ok: ${configured.length} configured provider(s)`);
   } catch (error) {
+    window.HynousRuntime.paintRuntimeBanner({ configured: true, healthy: false, capabilities: null });
     relayStatusEl.textContent = `Relay probe failed: ${error.message}`;
     pollinationsStatusEl.textContent = "Relay probe failed; browser will use Pollinations or SVG.";
     pushEvent(`relay probe failed: ${error.message}`);
