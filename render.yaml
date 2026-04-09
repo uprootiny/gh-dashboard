@@ -1,0 +1,29 @@
+services:
+  - type: web
+    runtime: node
+    name: hynous-foundry
+    plan: free
+    buildCommand: ""
+    startCommand: node api/server.mjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: NODE_ENV
+        value: production
+      - key: LLM_PROVIDER_ORDER
+        value: ollama,anthropic,openai,openrouter
+      - key: CORS_ALLOW_ORIGINS
+        value: https://uprootiny.github.io,http://localhost:8788
+      - key: LLM_TIMEOUT_MS
+        value: "30000"
+      - key: LLM_MAX_RETRIES
+        value: "2"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: HF_TOKEN
+        sync: false
