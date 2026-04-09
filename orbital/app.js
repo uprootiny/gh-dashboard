@@ -409,24 +409,25 @@ async function probeRateLimit() {
 }
 
 async function probeRelay(base) {
-  const [healthRes, providersRes, traceRes, recoveryRes] = await Promise.all([
+  const [healthRes, capabilitiesRes, traceRes, recoveryRes] = await Promise.all([
     fetch(`${base}/api/health`),
-    fetch(`${base}/api/providers`),
+    fetch(`${base}/api/capabilities`),
     fetch(`${base}/api/foundry/trace`),
     fetch(`${base}/api/foundry/recovery`)
   ]);
   if (!healthRes.ok) throw new Error(`health ${healthRes.status}`);
   const health = await healthRes.json();
-  const providers = providersRes.ok ? await providersRes.json() : { providers: [] };
+  const capabilities = capabilitiesRes.ok ? await capabilitiesRes.json() : { llm: { providers: [] }, images: { relay: { configured: false } } };
   const trace = traceRes.ok ? await traceRes.json() : { count: null };
   const recovery = recoveryRes.ok ? await recoveryRes.json() : { needsRecovery: false };
-  const configuredProviders = (providers.providers || []).filter((provider) => provider.configured).length;
+  const configuredProviders = (capabilities.llm?.providers || []).filter((provider) => provider.configured).length;
+  const imageConfigured = Boolean(capabilities.images?.relay?.configured);
   return {
     healthy: Boolean(health.ok),
     configuredProviders,
     traceCount: typeof trace.count === "number" ? trace.count : null,
     recoveryNeeded: Boolean(recovery.needsRecovery),
-    summary: `healthy=${Boolean(health.ok)} configuredProviders=${configuredProviders} trace=${trace.count ?? "n/a"} recovery=${Boolean(recovery.needsRecovery)}`
+    summary: `healthy=${Boolean(health.ok)} llm=${configuredProviders} imageRelay=${imageConfigured} trace=${trace.count ?? "n/a"} recovery=${Boolean(recovery.needsRecovery)}`
   };
 }
 

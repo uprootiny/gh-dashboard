@@ -78,6 +78,10 @@ try {
   const providers = await fetchJson("/api/providers");
   assert.ok(Array.isArray(providers.providers));
 
+  const capabilities = await fetchJson("/api/capabilities");
+  assert.ok(Array.isArray(capabilities.llm?.providers));
+  assert.ok(Array.isArray(capabilities.images?.browserFallbacks));
+
   const chat = await fetchJson("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

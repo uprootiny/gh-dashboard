@@ -372,11 +372,16 @@ async function refreshProviderStatus() {
   providerOrder.innerHTML = `<span class="pill">Checking providers…</span>`;
 
   try {
-    const info = await apiJson("/api/providers", { method: "GET" });
-    providerOrder.innerHTML = info.providers
+    const info = await apiJson("/api/capabilities", { method: "GET" });
+    providerOrder.innerHTML = info.llm.providers
       .map((provider) => `<span class="pill">${escapeHtml(provider.id)}: ${provider.configured ? escapeHtml(provider.model || "configured") : "not configured"}</span>`)
       .join("");
-    compileStatus.textContent = `Compiler reachable. Provider order: ${info.providerOrder.join(" → ")}`;
+    if (info.images?.relay?.configured) {
+      providerOrder.innerHTML += `<span class="pill">image: ${escapeHtml(info.images.relay.provider)} ${escapeHtml(info.images.relay.model || "")}</span>`;
+    } else {
+      providerOrder.innerHTML += `<span class="pill">image: browser fallback only</span>`;
+    }
+    compileStatus.textContent = `Compiler reachable. LLM order: ${info.providerOrder.join(" → ")}. Foundry stage: ${info.foundry?.currentStage || "unknown"}.`;
   } catch {
     providerOrder.innerHTML = `<span class="pill">API unavailable</span>`;
     compileStatus.textContent = "Could not reach the VPS API. The foundry can still render locally, but LLM compilation is offline.";

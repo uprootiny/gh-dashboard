@@ -244,23 +244,28 @@ async function probeDiagnostics() {
   }
 
   try {
-    const [healthRes, providersRes] = await Promise.all([
+    const [healthRes, capabilitiesRes] = await Promise.all([
       fetch(`${base}/api/health`),
-      fetch(`${base}/api/providers`)
+      fetch(`${base}/api/capabilities`)
     ]);
 
     const health = await healthRes.json();
-    const providers = await providersRes.json();
-    const configured = (providers.providers || [])
+    const capabilities = await capabilitiesRes.json();
+    const configured = (capabilities.llm?.providers || [])
       .filter((provider) => provider.configured)
       .map((provider) => `${provider.id}:${provider.model || "configured"}`);
+    const imageRelay = capabilities.images?.relay;
 
     relayStatusEl.textContent = health.ok
-      ? `Reachable. Service ${health.service} responded; configured providers: ${configured.join(", ") || "none"}`
+      ? `Reachable. Service ${health.service} responded; configured LLM providers: ${configured.join(", ") || "none"}`
       : "Relay responded without healthy status.";
+    pollinationsStatusEl.textContent = imageRelay?.configured
+      ? `Relay image backend configured: ${imageRelay.provider}:${imageRelay.model}`
+      : "Relay image backend not configured; browser will use Pollinations or SVG.";
     pushEvent(`relay probe ok: ${configured.length} configured provider(s)`);
   } catch (error) {
     relayStatusEl.textContent = `Relay probe failed: ${error.message}`;
+    pollinationsStatusEl.textContent = "Relay probe failed; browser will use Pollinations or SVG.";
     pushEvent(`relay probe failed: ${error.message}`);
   }
 

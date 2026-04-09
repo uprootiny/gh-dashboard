@@ -61,6 +61,10 @@ createServer(async (req, res) => {
       });
     }
 
+    if (req.method === "GET" && url.pathname === "/api/capabilities") {
+      return writeJson(res, 200, await buildCapabilitiesPayload());
+    }
+
     if (req.method === "POST" && url.pathname === "/api/chat") {
       const body = await readJsonBody(req);
       const prompt = String(body?.prompt || "").trim();
@@ -198,6 +202,48 @@ function listConfiguredProviders() {
     configured: isProviderConfigured(provider),
     model: configuredModel(provider)
   }));
+}
+
+async function buildCapabilitiesPayload() {
+  const providers = listConfiguredProviders();
+  const foundry = await readFoundryStateSummary();
+  return {
+    service: "hynous-foundry",
+    providerOrder: PROVIDER_ORDER,
+    llm: {
+      providers,
+      configuredCount: providers.filter((provider) => provider.configured).length
+    },
+    images: {
+      relay: {
+        configured: Boolean(process.env.HF_TOKEN),
+        provider: Boolean(process.env.HF_TOKEN) ? "huggingface" : null,
+        model: process.env.HF_IMAGE_MODEL || "stabilityai/stable-diffusion-xl-base-1.0"
+      },
+      browserFallbacks: ["pollinations", "svg"]
+    },
+    foundry
+  };
+}
+
+async function readFoundryStateSummary() {
+  try {
+    const [traceRaw, recoveryRaw] = await Promise.all([
+      readFile(path.join(ROOT, "foundry", "state", "trace-ledger.json"), "utf8").catch(() => "[]"),
+      readFile(path.join(ROOT, "foundry", "state", "session.json"), "utf8").catch(() => "{}")
+    ]);
+    const trace = traceRaw ? JSON.parse(traceRaw) : [];
+    const session = recoveryRaw ? JSON.parse(recoveryRaw) : {};
+    return {
+      traceCount: Array.isArray(trace) ? trace.length : 0,
+      currentStage: session.current_stage || "unknown"
+    };
+  } catch {
+    return {
+      traceCount: 0,
+      currentStage: "unknown"
+    };
+  }
 }
 
 function isProviderConfigured(provider) {
